@@ -1,3 +1,4 @@
+import { supabase } from './supabaseClient';
 import { type FC, useEffect, useState } from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
@@ -20,17 +21,33 @@ const App: FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!publicKey) {
-      setIsOG(false);
+    const fetchData = async () => {
+      if (!publicKey) {
+        setIsOG(false);
+        setCheckingOG(false);
+        return;
+      }
+
+      const wallet = publicKey.toBase58();
+
+      const { data: ogData } = await supabase
+        .from('og_list')
+        .select('*')
+        .eq('wallet', wallet)
+        .single();
+
+      const { data: twitterData } = await supabase
+        .from('twitter_handles')
+        .select('handle')
+        .eq('wallet', wallet)
+        .single();
+
+      setIsOG(!!ogData);
+      setSavedTwitter(twitterData?.handle || null);
       setCheckingOG(false);
-      return;
-    }
-    const key = publicKey.toBase58();
-    const ogList = JSON.parse(localStorage.getItem('ogList') || '[]');
-    const twitterMap = JSON.parse(localStorage.getItem('twitterMap') || '{}');
-    setIsOG(ogList.includes(key));
-    setSavedTwitter(twitterMap[key] || null);
-    setCheckingOG(false);
+    };
+
+    fetchData();
   }, [publicKey]);
 
   const handleTransfer = async () => {
@@ -45,16 +62,21 @@ const App: FC = () => {
       await connection.confirmTransaction(signature, 'confirmed');
 
       const key = publicKey.toBase58();
-      const ogList = JSON.parse(localStorage.getItem('ogList') || '[]');
-      if (!ogList.includes(key)) {
-        ogList.push(key);
-        localStorage.setItem('ogList', JSON.stringify(ogList));
-      }
+      await supabase.from('og_list').insert({ wallet: key });
 
       if (inviteCode && inviteCode !== key) {
-        const scores = JSON.parse(localStorage.getItem('scores') || '{}');
-        scores[inviteCode] = (scores[inviteCode] || 0) + 1;
-        localStorage.setItem('scores', JSON.stringify(scores));
+        const { data, error } = await supabase
+          .from('scores')
+          .select('score')
+          .eq('wallet', inviteCode)
+          .single();
+
+        if (!error && data) {
+          const updatedScore = (data.score || 0) + 1;
+          await supabase.from('scores').update({ score: updatedScore }).eq('wallet', inviteCode);
+        } else {
+          await supabase.from('scores').insert({ wallet: inviteCode, score: 1 });
+        }
       }
 
       setIsOG(true);
@@ -65,11 +87,11 @@ const App: FC = () => {
     }
   };
 
-  const handleSaveTwitter = () => {
+  const handleSaveTwitter = async () => {
     if (!publicKey || !twitterHandle.trim()) return;
-    const twitterMap = JSON.parse(localStorage.getItem('twitterMap') || '{}');
-    twitterMap[publicKey.toBase58()] = twitterHandle.trim();
-    localStorage.setItem('twitterMap', JSON.stringify(twitterMap));
+    await supabase
+      .from('twitter_handles')
+      .upsert({ wallet: publicKey.toBase58(), handle: twitterHandle.trim() });
     setSavedTwitter(twitterHandle.trim());
     alert('✅ X handle linked successfully');
   };
@@ -83,105 +105,26 @@ const App: FC = () => {
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: '100vh',
-        width: '100vw',
-        backgroundImage: 'url("/background.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        color: 'white',
-        textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
-        overflow: 'auto',
-      }}
-    >
-      <div style={{ position: 'absolute', top: 20, right: 20 }}>
-        <WalletMultiButton />
-      </div>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, height: '100vh', width: '100vw', backgroundImage: 'url("/background.png")', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', color: 'white', textShadow: '1px 1px 4px rgba(0,0,0,0.6)', overflow: 'auto' }}>
+      <div style={{ position: 'absolute', top: 20, right: 20 }}><WalletMultiButton /></div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          minHeight: '100%',
-          paddingTop: 80,
-          paddingBottom: 80,
-        }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100%', paddingTop: 80, paddingBottom: 80 }}>
         <h1 style={{ fontSize: '40px', marginBottom: '10px' }}>🎨 NFTMEME</h1>
-
-        <a
-          href="/leaderboard"
-          style={{
-            fontSize: '14px',
-            color: '#ffffff',
-            textDecoration: 'underline',
-            marginBottom: '40px',
-          }}
-        >
-          View Leaderboard
-        </a>
+        <a href="/leaderboard" style={{ fontSize: '14px', color: '#ffffff', textDecoration: 'underline', marginBottom: '40px' }}>View Leaderboard</a>
 
         {!checkingOG && !isOG && (
-          <button
-            onClick={handleTransfer}
-            style={{
-              padding: '16px 32px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              background: 'linear-gradient(to right, #6366f1, #8b5cf6)',
-              color: 'white',
-              border: 'none',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
+          <button onClick={handleTransfer} style={{ padding: '16px 32px', fontSize: '18px', fontWeight: 'bold', borderRadius: '12px', cursor: 'pointer', background: 'linear-gradient(to right, #6366f1, #8b5cf6)', color: 'white', border: 'none', boxShadow: '0 4px 14px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease' }}
+            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
             Obtain OG identity (interaction fee 0.01SOL)
           </button>
         )}
 
         {publicKey && isOG && (
-          <div
-            style={{
-              marginTop: 40,
-              padding: 20,
-              maxWidth: 340,
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: 16,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
-              color: 'white',
-              backdropFilter: 'blur(10px)',
-              textAlign: 'center',
-            }}
-          >
+          <div style={{ marginTop: 40, padding: 20, maxWidth: 340, background: 'rgba(255, 255, 255, 0.1)', borderRadius: 16, boxShadow: '0 8px 20px rgba(0,0,0,0.2)', color: 'white', backdropFilter: 'blur(10px)', textAlign: 'center' }}>
             <h2 style={{ fontSize: 20 }}>🎖️ You are already OG!</h2>
             <p style={{ fontSize: 14, opacity: 0.85 }}>Thank you for supporting NFTMEME.</p>
-
-            <p
-              onClick={handleCopy}
-              style={{
-                marginTop: 20,
-                fontSize: 12,
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                wordBreak: 'break-all',
-              }}
-            >
+            <p onClick={handleCopy} style={{ marginTop: 20, fontSize: 12, cursor: 'pointer', textDecoration: 'underline', wordBreak: 'break-all' }}>
               Invite Link (click to copy):<br />
               <code>{`https://your-domain.com/?ref=${publicKey.toBase58()}`}</code><br />
               {copied && <span style={{ color: '#4ade80' }}>✅ Copied!</span>}
@@ -190,41 +133,12 @@ const App: FC = () => {
             <div style={{ marginTop: 20 }}>
               {savedTwitter ? (
                 <p style={{ fontSize: 12 }}>
-                  ✅ X Linked: <a
-                    href={`https://x.com/${savedTwitter}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#1DA1F2' }}
-                  >
-                    @{savedTwitter}
-                  </a>
+                  ✅ X Linked: <a href={`https://x.com/${savedTwitter}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1DA1F2' }}>@{savedTwitter}</a>
                 </p>
               ) : (
                 <>
-                  <input
-                    type="text"
-                    placeholder="Enter your X username"
-                    value={twitterHandle}
-                    onChange={(e) => setTwitterHandle(e.target.value)}
-                    style={{
-                      padding: '8px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      width: '100%',
-                      marginBottom: '10px',
-                    }}
-                  />
-                  <button
-                    onClick={handleSaveTwitter}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#1DA1F2',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                    }}
-                  >
+                  <input type="text" placeholder="Enter your X username" value={twitterHandle} onChange={(e) => setTwitterHandle(e.target.value)} style={{ padding: '8px', borderRadius: '8px', border: 'none', width: '100%', marginBottom: '10px' }} />
+                  <button onClick={handleSaveTwitter} style={{ padding: '8px 16px', background: '#1DA1F2', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
                     Bind X
                   </button>
                 </>
@@ -235,16 +149,7 @@ const App: FC = () => {
       </div>
 
       {/* ✅ 固定社交信息图标 */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 20,
-          right: 20,
-          display: 'flex',
-          gap: 16,
-          zIndex: 10,
-        }}
-      >
+      <div style={{ position: 'fixed', bottom: 20, right: 20, display: 'flex', gap: 16, zIndex: 10 }}>
         <a href="https://x.com/solananftmeme?s=21" target="_blank" rel="noopener noreferrer">
           <img src="/x-logo.png" alt="X" style={{ width: 32, height: 32 }} />
         </a>

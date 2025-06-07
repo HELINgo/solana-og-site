@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from './supabaseClient';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -9,10 +10,36 @@ const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const storedScores = JSON.parse(localStorage.getItem('scores') || '{}');
-    const storedTwitter = JSON.parse(localStorage.getItem('twitterMap') || '{}');
-    setScores(storedScores);
-    setTwitterMap(storedTwitter);
+    const fetchLeaderboard = async () => {
+      const { data: scoreData } = await supabase
+        .from('scores')
+        .select('wallet, score')
+        .order('score', { ascending: false });
+
+      const { data: twitterData } = await supabase
+        .from('twitter_handles')
+        .select('wallet, handle');
+
+      const scoreMap: { [wallet: string]: number } = {};
+      const twitterMap: { [wallet: string]: string } = {};
+
+      if (scoreData) {
+        scoreData.forEach((item) => {
+          scoreMap[item.wallet] = item.score;
+        });
+      }
+
+      if (twitterData) {
+        twitterData.forEach((item) => {
+          twitterMap[item.wallet] = item.handle;
+        });
+      }
+
+      setScores(scoreMap);
+      setTwitterMap(twitterMap);
+    };
+
+    fetchLeaderboard();
   }, []);
 
   const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
@@ -92,7 +119,6 @@ const Leaderboard: React.FC = () => {
           )}
         </div>
 
-        {/* 分页按钮 + 上一页/下一页 */}
         <div style={{ textAlign: 'center', marginTop: 30 }}>
           <button
             onClick={() => goToPage(currentPage - 1)}
@@ -153,4 +179,3 @@ const Leaderboard: React.FC = () => {
 };
 
 export default Leaderboard;
-
