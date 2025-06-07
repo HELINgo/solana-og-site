@@ -3,14 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <title>NFTMEME</title>
-
-    <!-- 添加 favicon 图标 -->
-    <link rel="icon" href="/favicon.png" type="image/png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="NFTMEME - Become an OG on Solana" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+
+    <!-- 初始背景与加载文字防止白屏 -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #000; /* 背景设为黑色防止白屏 */
+        color: white;
+        font-family: system-ui, sans-serif;
+      }
+
+      #root {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #loading {
+        font-size: 18px;
+        color: white;
+        opacity: 0.8;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="loading">Loading NFTMEME...</div>
+    </div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
