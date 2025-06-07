@@ -124,6 +124,20 @@ const App: FC = () => {
           <div style={{ marginTop: 40, padding: 20, maxWidth: 340, background: 'rgba(255, 255, 255, 0.1)', borderRadius: 16, boxShadow: '0 8px 20px rgba(0,0,0,0.2)', color: 'white', backdropFilter: 'blur(10px)', textAlign: 'center' }}>
             <h2 style={{ fontSize: 20 }}>🎖️ You are already OG!</h2>
             <p style={{ fontSize: 14, opacity: 0.85 }}>Thank you for supporting NFTMEME.</p>
+
+            {/* 🎖️ OG Badge 图标 */}
+            <img
+              src="/og-badge.png"
+              alt="OG Badge"
+              style={{
+                width: 100,
+                height: 100,
+                marginTop: 20,
+                borderRadius: 12,
+                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+              }}
+            />
+
             <p onClick={handleCopy} style={{ marginTop: 20, fontSize: 12, cursor: 'pointer', textDecoration: 'underline', wordBreak: 'break-all' }}>
               Invite Link (click to copy):<br />
               <code>{`https://your-domain.com/?ref=${publicKey.toBase58()}`}</code><br />
