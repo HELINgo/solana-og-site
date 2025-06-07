@@ -81,9 +81,9 @@ const App: FC = () => {
 
       setIsOG(true);
       alert('🎉 Transfer successful! You are now OG!');
-    } catch (err) {
-      console.error(err);
-      alert('❌ Transfer failed. Please check your balance or network.');
+    } catch (err: any) {
+      console.error("Transfer failed:", err);
+      alert(`❌ Transfer failed: ${err.message || err}`);
     }
   };
 
@@ -97,7 +97,7 @@ const App: FC = () => {
   };
 
   const handleCopy = () => {
-    const url = `https://your-domain.com/?ref=${publicKey?.toBase58()}`;
+    const url = `https://nftmeme001.com/?ref=${publicKey?.toBase58()}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -125,7 +125,6 @@ const App: FC = () => {
             <h2 style={{ fontSize: 20 }}>🎖️ You are already OG!</h2>
             <p style={{ fontSize: 14, opacity: 0.85 }}>Thank you for supporting NFTMEME.</p>
 
-            {/* 🎖️ OG Badge 图标 */}
             <img
               src="/og-badge.png"
               alt="OG Badge"
@@ -140,7 +139,7 @@ const App: FC = () => {
 
             <p onClick={handleCopy} style={{ marginTop: 20, fontSize: 12, cursor: 'pointer', textDecoration: 'underline', wordBreak: 'break-all' }}>
               Invite Link (click to copy):<br />
-              <code>{`https://your-domain.com/?ref=${publicKey.toBase58()}`}</code><br />
+              <code>{`https://nftmeme001.com/?ref=${publicKey.toBase58()}`}</code><br />
               {copied && <span style={{ color: '#4ade80' }}>✅ Copied!</span>}
             </p>
 
@@ -162,7 +161,6 @@ const App: FC = () => {
         )}
       </div>
 
-      {/* ✅ 固定社交信息图标 */}
       <div style={{ position: 'fixed', bottom: 20, right: 20, display: 'flex', gap: 16, zIndex: 10 }}>
         <a href="https://x.com/solananftmeme?s=21" target="_blank" rel="noopener noreferrer">
           <img src="/x-logo.png" alt="X" style={{ width: 32, height: 32 }} />

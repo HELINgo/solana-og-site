@@ -14,11 +14,11 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-// ✅ 主网 RPC
-const endpoint = 'https://api.mainnet-beta.solana.com';
+// ✅ 使用 Helius 主网 RPC
+const endpoint = 'https://mainnet.helius-rpc.com/?api-key=93707546-ed51-468e-ad92-7399bef01649';
 const wallets = [new PhantomWalletAdapter()];
 
-// ✅ 全局加载组件
+// ✅ 全局加载中组件
 const Loading = () => (
   <div
     style={{
@@ -52,6 +52,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </WalletProvider>
   </ConnectionProvider>
 );
+
 
 
 
