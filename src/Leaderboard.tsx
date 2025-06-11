@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 
@@ -21,22 +21,26 @@ const Leaderboard: React.FC = () => {
         .select('wallet, handle');
 
       const scoreMap: { [wallet: string]: number } = {};
-      const twitterMap: { [wallet: string]: string } = {};
+      const twMap: { [wallet: string]: string } = {};
 
       if (scoreData) {
-        scoreData.forEach((item) => {
-          scoreMap[item.wallet] = item.score;
-        });
+        for (const item of scoreData) {
+          if (item.wallet && typeof item.score === 'number') {
+            scoreMap[item.wallet] = item.score;
+          }
+        }
       }
 
       if (twitterData) {
-        twitterData.forEach((item) => {
-          twitterMap[item.wallet] = item.handle;
-        });
+        for (const item of twitterData) {
+          if (item.wallet && item.handle) {
+            twMap[item.wallet] = item.handle;
+          }
+        }
       }
 
       setScores(scoreMap);
-      setTwitterMap(twitterMap);
+      setTwitterMap(twMap);
     };
 
     fetchLeaderboard();
@@ -47,11 +51,11 @@ const Leaderboard: React.FC = () => {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = sortedScores.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const goToPage = (page: number) => {
+  const goToPage = useCallback((page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
-  };
+  }, [totalPages]);
 
   return (
     <div
@@ -70,41 +74,50 @@ const Leaderboard: React.FC = () => {
         color: 'white',
         overflow: 'auto',
         textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
+        paddingBottom: 80,
       }}
     >
       <div style={{ padding: 40 }}>
-        <Link to="/" style={{ color: 'white', textDecoration: 'underline' }}>
+        <Link to="/" style={{ color: '#fff', textDecoration: 'underline', fontSize: 14 }}>
           ← Back to Home
         </Link>
 
-        <h1 style={{ fontSize: '36px', textAlign: 'center', marginTop: 20 }}>🏆 OG Leaderboard</h1>
+        <h1 style={{ fontSize: '36px', textAlign: 'center', marginTop: 20 }}>
+          🏆 OG Leaderboard
+        </h1>
 
-        <div style={{ marginTop: 40, maxWidth: 1000, marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ marginTop: 40, maxWidth: 1000, margin: '0 auto' }}>
           {currentItems.length === 0 ? (
             <p style={{ textAlign: 'center', opacity: 0.8 }}>No scores yet.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.3)' }}>
-                  <th style={{ textAlign: 'left', padding: 10 }}>Rank</th>
-                  <th style={{ textAlign: 'left', padding: 10 }}>Wallet</th>
-                  <th style={{ textAlign: 'right', padding: 10 }}>Score</th>
-                  <th style={{ textAlign: 'center', padding: 10 }}>X</th>
+                <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.4)' }}>
+                  <th style={{ textAlign: 'left', padding: 12 }}>#</th>
+                  <th style={{ textAlign: 'left', padding: 12 }}>Wallet</th>
+                  <th style={{ textAlign: 'right', padding: 12 }}>Score</th>
+                  <th style={{ textAlign: 'center', padding: 12 }}>X</th>
                 </tr>
               </thead>
               <tbody>
                 {currentItems.map(([wallet, score], index) => (
-                  <tr key={wallet} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <td style={{ padding: 10 }}>{startIndex + index + 1}</td>
-                    <td style={{ padding: 10 }}>{wallet.slice(0, 4)}...{wallet.slice(-4)}</td>
-                    <td style={{ padding: 10, textAlign: 'right' }}>{score}</td>
-                    <td style={{ padding: 10, textAlign: 'center' }}>
+                  <tr
+                    key={wallet}
+                    style={{
+                      borderBottom: '1px solid rgba(255,255,255,0.1)',
+                      transition: 'background 0.3s',
+                    }}
+                  >
+                    <td style={{ padding: 12 }}>{startIndex + index + 1}</td>
+                    <td style={{ padding: 12 }}>{wallet.slice(0, 4)}...{wallet.slice(-4)}</td>
+                    <td style={{ padding: 12, textAlign: 'right' }}>{score}</td>
+                    <td style={{ padding: 12, textAlign: 'center' }}>
                       {twitterMap[wallet] ? (
                         <a
                           href={`https://x.com/${twitterMap[wallet]}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#1DA1F2', textDecoration: 'underline', fontSize: 14 }}
+                          style={{ color: '#1DA1F2', textDecoration: 'underline', fontSize: 13 }}
                         >
                           @{twitterMap[wallet]}
                         </a>
@@ -119,19 +132,20 @@ const Leaderboard: React.FC = () => {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 30 }}>
+        {/* Pagination */}
+        <div style={{ textAlign: 'center', marginTop: 40 }}>
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
             style={{
-              margin: '0 8px',
-              padding: '6px 12px',
+              margin: '0 6px',
+              padding: '8px 16px',
               background: 'transparent',
               border: '1px solid white',
               borderRadius: 6,
               color: 'white',
               cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-              opacity: currentPage === 1 ? 0.5 : 1
+              opacity: currentPage === 1 ? 0.5 : 1,
             }}
           >
             ← Prev
@@ -143,13 +157,14 @@ const Leaderboard: React.FC = () => {
               onClick={() => goToPage(i + 1)}
               style={{
                 margin: '0 4px',
-                padding: '6px 12px',
+                padding: '8px 16px',
                 background: currentPage === i + 1 ? '#8b5cf6' : 'transparent',
                 border: '1px solid white',
                 borderRadius: 6,
                 color: 'white',
                 cursor: 'pointer',
-                fontWeight: currentPage === i + 1 ? 'bold' : 'normal'
+                fontWeight: currentPage === i + 1 ? 'bold' : 'normal',
+                boxShadow: currentPage === i + 1 ? '0 0 8px rgba(139, 92, 246, 0.5)' : 'none',
               }}
             >
               {i + 1}
@@ -160,14 +175,14 @@ const Leaderboard: React.FC = () => {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             style={{
-              margin: '0 8px',
-              padding: '6px 12px',
+              margin: '0 6px',
+              padding: '8px 16px',
               background: 'transparent',
               border: '1px solid white',
               borderRadius: 6,
               color: 'white',
               cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-              opacity: currentPage === totalPages ? 0.5 : 1
+              opacity: currentPage === totalPages ? 0.5 : 1,
             }}
           >
             Next →

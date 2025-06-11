@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import App from './App.tsx';
 import Leaderboard from './Leaderboard.tsx';
+import OGTools from './pages/GTools.tsx'; // ✅ 修正路径：从 ./OGTools.tsx 改成 ./pages/GTools.tsx
 
 import {
   ConnectionProvider,
@@ -11,14 +12,24 @@ import {
 } from '@solana/wallet-adapter-react';
 
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import {
+  PhantomWalletAdapter,
+  MathWalletAdapter,
+  CoinbaseWalletAdapter,
+  LedgerWalletAdapter
+} from '@solana/wallet-adapter-wallets';
+
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-// ✅ 使用 Helius 主网 RPC
 const endpoint = 'https://mainnet.helius-rpc.com/?api-key=93707546-ed51-468e-ad92-7399bef01649';
-const wallets = [new PhantomWalletAdapter()];
 
-// ✅ 全局加载中组件
+const wallets = [
+  new PhantomWalletAdapter(),
+  new MathWalletAdapter(),
+  new CoinbaseWalletAdapter(),
+  new LedgerWalletAdapter()
+];
+
 const Loading = () => (
   <div
     style={{
@@ -45,6 +56,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Routes>
               <Route path="/" element={<App />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/og-tools" element={<OGTools />} /> {/* ✅ OG 专属页面 */}
             </Routes>
           </Suspense>
         </BrowserRouter>
@@ -52,6 +64,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </WalletProvider>
   </ConnectionProvider>
 );
+
+
+
+
+
+
+
+
+
+
+
 
 
 
