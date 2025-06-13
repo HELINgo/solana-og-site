@@ -1,36 +1,40 @@
-// api/updateLeaderboard.ts
+// /api/updateLeaderboard.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
-import path from 'path';
 import { supabase } from '../../src/supabaseClient';
 
-// 判断是否为 NFT 项目
-const isNFT = (name: string) => {
-  return /nft|art|ape|punk|monkey|collection/i.test(name);
+const isNFT = (name: string) =>
+  /nft|art|ape|punk|monkey|collection/i.test(name);
+
+// 模拟从外部重新抓取数据（在这里写死部分演示数据，真实环境你应改为 Playwright 抓取）
+const fetchProjects = async () => {
+  return [
+    {
+      name: '@Polymarket',
+      chain: 'SOL',
+      heat: 7937,
+      launch_time: new Date().toISOString(),
+    },
+    {
+      name: '@MEXC_Listings',
+      chain: 'SOL',
+      heat: 8856,
+      launch_time: new Date().toISOString(),
+    },
+  ];
 };
 
-// ESModule 风格的 API handler
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'fetched_projects.json');
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'fetched_projects.json 文件不存在' });
-    }
-
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    const projects = JSON.parse(raw);
+    const projects = await fetchProjects();
 
     let successCount = 0;
     let failCount = 0;
 
     for (const item of projects) {
       const score = item.heat + 500;
-
       const twitter = item.name.startsWith('@')
         ? `https://twitter.com/${item.name.replace('@', '')}`
         : 'EMPTY';
-
       const targetTable = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
 
       const { error } = await supabase.from(targetTable).upsert({
@@ -50,12 +54,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    return res.status(200).json({ message: '数据处理完成', successCount, failCount });
+    return res.status(200).json({ message: '更新成功', successCount, failCount });
   } catch (err: any) {
-    console.error('服务器错误:', err);
+    console.error('❌ API 错误:', err);
     return res.status(500).json({ error: '服务器错误', detail: err.message });
   }
-};
-
-export default handler;
-
+}
