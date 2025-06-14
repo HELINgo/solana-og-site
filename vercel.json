@@ -1,8 +1,29 @@
 {
-  "functions": {
-    "api/updateLeaderboard.ts": {
-      "runtime": "@vercel/node@3"
+  "version": 2,
+  "builds": [
+    {
+      // 用静态构建器把 Vite 产物 (dist/) 部署为静态站点
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      // 把 api 目录下的 .ts 文件当 Serverless 函数部署
+      "src": "api/**/*.ts",
+      "use": "@vercel/node@3.0.0",
+      "config": { "runtime": "nodejs18.x" }
     }
-  }
+  ],
+  "routes": [
+    {
+      // 请求 /api/** 时，走到对应的 TypeScript 函数
+      "src": "/api/(.*)",
+      "dest": "/api/$1.ts"
+    },
+    {
+      // 其他所有路由都返回 index.html，由前端路由接管
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
-
