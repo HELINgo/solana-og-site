@@ -1,11 +1,16 @@
-// /api/updateLeaderboard.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../src/supabaseClient';
+// api/updateLeaderboard.ts
+import { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
+
+// 读取环境变量（你已经在 Vercel 上设置过了）
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 const isNFT = (name: string) =>
   /nft|art|ape|punk|monkey|collection/i.test(name);
 
-// 模拟从外部重新抓取数据（在这里写死部分演示数据，真实环境你应改为 Playwright 抓取）
 const fetchProjects = async () => {
   return [
     {
@@ -23,40 +28,40 @@ const fetchProjects = async () => {
   ];
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const projects = await fetchProjects();
-
     let successCount = 0;
     let failCount = 0;
 
     for (const item of projects) {
       const score = item.heat + 500;
       const twitter = item.name.startsWith('@')
-        ? `https://twitter.com/${item.name.replace('@', '')}`
-        : 'EMPTY';
-      const targetTable = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
+        ? `https://twitter.com/${item.name.replace('@', '')}` : 'EMPTY';
 
-      const { error } = await supabase.from(targetTable).upsert({
+      const table = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
+
+      const { error } = await supabase.from(table).upsert({
         name: item.name,
-        chain: item.chain || '未知',
+        chain: item.chain,
         heat: score,
         launch_time: item.launch_time,
         twitter,
       });
 
       if (error) {
-        console.error(`❌ 插入失败: ${item.name}`, error);
+        console.error('❌ 插入失败', item.name, error);
         failCount++;
       } else {
-        console.log(`✅ 插入成功: ${item.name} -> ${targetTable}`);
+        console.log('✅ 成功:', item.name);
         successCount++;
       }
     }
 
-    return res.status(200).json({ message: '更新成功', successCount, failCount });
+    res.status(200).json({ message: '更新完成', successCount, failCount });
   } catch (err: any) {
-    console.error('❌ API 错误:', err);
-    return res.status(500).json({ error: '服务器错误', detail: err.message });
+    console.error('❌ 服务器错误:', err.message);
+    res.status(500).json({ error: '服务器错误', detail: err.message });
   }
 }
+
