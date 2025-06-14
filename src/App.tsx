@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import MainApp from "./pages/MainApp";
 import GTools from "./pages/GTools";
@@ -14,3 +13,4 @@ const App = () => {
 };
 
 export default App;
+;
