@@ -1,7 +1,8 @@
 {
   "functions": {
-    "api/**/*.ts": {
+    "api/updateLeaderboard.ts": {
       "runtime": "nodejs18.x"
     }
   }
 }
+
