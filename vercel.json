@@ -12,11 +12,8 @@
     }
   ],
   "routes": [
-    // 静态资源优先
     { "handle": "filesystem" },
-    // /api 下的请求走函数
     { "src": "/api/(.*)", "dest": "api/$1.ts" },
-    // 其余全部返回 index.html（SPA fallback）
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)",       "dest": "/index.html" }
   ]
 }
