@@ -1,15 +1,13 @@
 {
   "version": 2,
   "builds": [
-    // 1) 所有 api 下的 .ts 都用 @vercel/node@3 打包成 Serverless 函数
-    { "src": "api/**/*.ts",      "use": "@vercel/node@3" },
-    // 2) 其余走静态构建：执行 package.json 里的 build 脚本，默认 dist 目录
-    { "src": "package.json",     "use": "@vercel/static-build" }
+    { "src": "api/**/*.ts", "use": "@vercel/node@3" },
+    { "src": "package.json", "use": "@vercel/static-build" }
   ],
   "routes": [
-    // 把 /api/* 直接路由到 api 目录下对应的 ts 函数
-    { "src": "/api/(.*)", "dest": "/api/$1.ts" },
-    // 其他都归到静态文件（dist）里
-    { "src": "/(.*)",     "dest": "/$1" }
-  ]
+    { "src": "/api/(.*)", "dest": "api/$1.ts" },
+    { "src": "/(.*)", "dest": "/" }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
