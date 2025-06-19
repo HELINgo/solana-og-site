@@ -1,4 +1,3 @@
-// src/pages/OGTools.tsx
 import { type FC, useEffect, useState } from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -20,7 +19,7 @@ const formatCountdown = (dateStr: string) => {
   const now = new Date();
   const launch = new Date(dateStr);
   const diff = launch.getTime() - now.getTime();
-  if (diff <= 0) return '✅ 已上线';
+  if (diff <= 0) return '✅ Already online';
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   return `⏳ ${hours}h ${mins}m`;
@@ -89,11 +88,35 @@ const OGTools: FC = () => {
 
   if (isOG === false) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: 'white', backgroundColor: '#000', minHeight: '100vh' }}>
-        <h2>❌ Access Denied</h2>
-        <p>This page is for OG users only.</p>
-        <button onClick={() => navigate('/')} style={{ marginTop: 20, padding: '10px 20px', border: 'none', borderRadius: 8, background: '#1DA1F2', color: 'white', cursor: 'pointer' }}>
-          🔙 Go Back
+      <div style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundImage: 'url("/background.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        padding: 40,
+        textAlign: 'center'
+      }}>
+        <h2 style={{ fontSize: 28, marginBottom: 16 }}>❌ Access Denied</h2>
+        <p style={{ fontSize: 14, opacity: 0.9, marginBottom: 20 }}>This page is for OG users only.</p>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            padding: '12px 24px',
+            fontSize: 14,
+            borderRadius: 8,
+            background: '#1DA1F2',
+            border: 'none',
+            color: 'white',
+            cursor: 'pointer',
+          }}
+        >
+          🔙 Back to Home
         </button>
       </div>
     );
@@ -101,46 +124,98 @@ const OGTools: FC = () => {
 
   if (isOG === null) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000', color: 'white' }}>
-        Loading...
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#000',
+        color: 'white'
+      }}>
+        Verifying OG identity...
       </div>
     );
   }
 
   const renderProjectCard = (project: ProjectItem, idx: number) => (
-    <div key={project.id || idx} style={{ background: '#111', padding: 16, borderRadius: 12, marginBottom: 16, display: 'flex', gap: 12 }}>
+    <div key={project.id || idx} style={{
+      background: '#111',
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 16,
+      display: 'flex',
+      gap: 12
+    }}>
       {project.logo && (
-        <img src={project.logo} alt="logo" style={{ width: 64, height: 64, borderRadius: 8 }} />
+        <img src={project.logo} alt="logo"
+          style={{ width: 64, height: 64, borderRadius: 8 }} />
       )}
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <strong>{idx + 1}. {project.name}</strong>
           <a href={project.twitter} target="_blank" rel="noopener noreferrer" style={{ color: '#1DA1F2' }}>X ↗</a>
         </div>
-        <p style={{ fontSize: 12, opacity: 0.85 }}>{project.intro || '暂无简介'}</p>
-        <p>链：{project.chain}</p>
-        <p>热度值：{project.heat}</p>
-        <p>上线时间：{formatCountdown(project.launch_time)}</p>
+        <p style={{ fontSize: 12, opacity: 0.85 }}>{project.intro || 'No introduction'}</p>
+        <p>chain：{project.chain}</p>
+        <p>Heat value：{project.heat}</p>
+        <p>Online time：{formatCountdown(project.launch_time)}</p>
       </div>
     </div>
   );
 
   return (
-    <div style={{ backgroundColor: '#000', color: 'white', minHeight: '100vh', padding: 40 }}>
-      <div style={{ position: 'absolute', top: 20, right: 20 }}>
-        <WalletMultiButton />
-      </div>
-
-      <h1 style={{ fontSize: 32, marginBottom: 20 }}>🚀 OG Tools</h1>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-        <div>
-          <h2>📊 热门代币项目排行</h2>
-          {tokens.length === 0 ? <p>暂无数据</p> : tokens.map(renderProjectCard)}
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: '100vh',
+      width: '100vw',
+      overflow: 'auto',
+      backgroundImage: 'url("/background.png")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      color: 'white',
+      textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
+    }}>
+      <div style={{ padding: 40, maxWidth: 1200, margin: '0 auto' }}>
+        {/* Wallet & 分栏导航 */}
+        <div style={{ position: 'fixed', top: 20, right: 20, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+          <WalletMultiButton />
+          <div style={{
+            marginTop: 10,
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: 10,
+            borderRadius: 12,
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            fontSize: 14
+          }}>
+            <a href="/" style={{ color: '#fff', textDecoration: 'none' }}>🏠 Home</a>
+            <a href="/leaderboard" style={{ color: '#00FFFF', textDecoration: 'none' }}>🏆 View Leaderboard</a>
+            <a href="/og-tools" style={{ color: '#1DA1F2', textDecoration: 'none' }}>🚀 Popular wealth</a>
+          </div>
         </div>
-        <div>
-          <h2>🎨 热门 NFT 项目排行</h2>
-          {nfts.length === 0 ? <p>暂无数据</p> : nfts.map(renderProjectCard)}
+
+        <h1 style={{ fontSize: 36, textAlign: 'center', marginBottom: 30 }}>🚀 Popular wealth</h1>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 40,
+        }}>
+          <div>
+            <h2>📊 Popular Token Project Ranking</h2>
+            {tokens.length === 0 ? <p>No data yet</p> : tokens.map(renderProjectCard)}
+          </div>
+          <div>
+            <h2>🎨 Popular NFT Project Ranking</h2>
+            {nfts.length === 0 ? <p>No data yet</p> : nfts.map(renderProjectCard)}
+          </div>
         </div>
       </div>
     </div>
@@ -148,3 +223,4 @@ const OGTools: FC = () => {
 };
 
 export default OGTools;
+

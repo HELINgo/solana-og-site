@@ -1,128 +1,79 @@
 [
   {
-    "name": "@racing_viral",
+    "name": "1BitcoinBTC",
     "chain": "SOL",
-    "heat": 7266,
-    "launch_time": "2025-06-13T06:01:12.700Z",
-    "twitter": "EMPTY"
+    "heat": 6236,
+    "launch_time": "2025-06-16T06:01:04.209Z",
+    "twitter": "https://twitter.com/1bitcoinbtc"
   },
   {
-    "name": "@racing_viral",
+    "name": "2EthereumETH",
     "chain": "SOL",
-    "heat": 7535,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 3180,
+    "launch_time": "2025-06-16T06:01:04.210Z",
+    "twitter": "https://twitter.com/2ethereumeth"
   },
   {
-    "name": "@racing_viral",
+    "name": "3TetherUSDT",
     "chain": "SOL",
-    "heat": 5220,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 779,
+    "launch_time": "2025-06-16T06:01:04.210Z",
+    "twitter": "https://twitter.com/3tetherusdt"
   },
   {
-    "name": "@racing_viral",
+    "name": "4XRPXRP",
     "chain": "SOL",
-    "heat": 6291,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 225,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/4xrpxrp"
   },
   {
-    "name": "@racing_viral",
+    "name": "5BNBBNB",
     "chain": "SOL",
-    "heat": 7628,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 8891,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/5bnbbnb"
   },
   {
-    "name": "@racing_viral",
+    "name": "6SolanaSOL",
     "chain": "SOL",
-    "heat": 12646,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 9032,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/6solanasol"
   },
   {
-    "name": "@racing_viral",
+    "name": "7USDCUSDC",
     "chain": "SOL",
-    "heat": 14842,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 7365,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/7usdcusdc"
   },
   {
-    "name": "@racing_viral",
+    "name": "8DogecoinDOGE",
     "chain": "SOL",
-    "heat": 12175,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 752,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/8dogecoindoge"
   },
   {
-    "name": "@racing_viral",
+    "name": "9TRONTRX",
     "chain": "SOL",
-    "heat": 13303,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 5490,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/9trontrx"
   },
   {
-    "name": "@racing_viral",
+    "name": "10Lido Staked ETHSTETH",
     "chain": "SOL",
-    "heat": 13981,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 3199,
+    "launch_time": "2025-06-16T06:01:04.211Z",
+    "twitter": "https://twitter.com/10lidostakedethsteth"
   },
   {
-    "name": "@racing_viral",
+    "name": "11CardanoADA",
     "chain": "SOL",
-    "heat": 5354,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "@Polymarket",
-    "chain": "SOL",
-    "heat": 7937,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "@Polymarket",
-    "chain": "SOL",
-    "heat": 13138,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "@MEXC_Listings",
-    "chain": "SOL",
-    "heat": 8856,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "@MEXC_Listings",
-    "chain": "SOL",
-    "heat": 10681,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "49",
-    "chain": "SOL",
-    "heat": 13834,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "49",
-    "chain": "SOL",
-    "heat": 11496,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
-  },
-  {
-    "name": "49",
-    "chain": "SOL",
-    "heat": 10402,
-    "launch_time": "2025-06-13T06:01:12.701Z",
-    "twitter": "EMPTY"
+    "heat": 4964,
+    "launch_time": "2025-06-16T06:01:04.212Z",
+    "twitter": "https://twitter.com/11cardanoada"
   }
 ]

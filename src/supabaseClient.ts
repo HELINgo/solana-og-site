@@ -1,13 +1,8 @@
 // src/supabaseClient.ts
 import { createClient } from '@supabase/supabase-js';
 
-// 如果是本地开发，加载 .env 文件
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
+// ✅ 使用 VITE_ 前缀的环境变量（Vite 构建时会注入）
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 
-// 从环境变量中读取 Supabase 配置
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

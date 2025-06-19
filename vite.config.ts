@@ -5,14 +5,17 @@ import inject from '@rollup/plugin-inject';
 import rollupNodePolyfills from 'rollup-plugin-polyfill-node';
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   define: {
-    'process.env': {},
+    'process.env': {}, // 防止环境变量报错
   },
   resolve: {
     alias: {
-      stream: 'node-libs-browser/mock/empty',
+      stream: 'stream-browserify',
       crypto: 'crypto-browserify',
+      buffer: 'buffer',
+      process: 'process', // ✅ 修复路径错误
     },
   },
   build: {
@@ -21,6 +24,7 @@ export default defineConfig({
       plugins: [
         inject({
           Buffer: ['buffer', 'Buffer'],
+          process: 'process', // ✅ 注入 polyfill
         }),
         rollupNodePolyfills(),
       ],
@@ -33,6 +37,8 @@ export default defineConfig({
     include: ['buffer', 'process'],
   },
 });
+
+
 
 
 

@@ -1,23 +1,17 @@
-// api/updateLeaderboard.ts
-import { VercelRequest, VercelResponse } from '@vercel/node';
+// scripts/runLeaderboardUpdate.ts
 import { chromium } from 'playwright';
 import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config';
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const CRON_SECRET = process.env.CRON_SECRET!; // ✅ 改对了！
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const isNFT = (name: string) =>
   /nft|art|ape|punk|monkey|collection/i.test(name.toLowerCase());
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const auth = req.headers.authorization;
-  if (!auth || auth !== `Bearer ${CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
+async function run() {
   console.log('⏳ 开始抓取项目...');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
@@ -28,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!rows || rows.length === 0) {
     await browser.close();
     console.error('❌ 未找到任何项目行');
-    return res.status(500).json({ error: '抓取失败，页面结构变化' });
+    return;
   }
 
   const projects = await Promise.all(rows.slice(0, 20).map(async (row, i) => {
@@ -73,6 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  res.status(200).json({ message: '更新完成', successCount, failCount });
+  console.log(`🎉 更新完成：成功 ${successCount} 项，失败 ${failCount} 项`);
 }
 
+run();

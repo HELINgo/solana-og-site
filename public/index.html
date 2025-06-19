@@ -2,14 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NFTMEME</title>
 
-    <!-- 添加 favicon 图标 -->
-    <link rel="icon" href="/favicon.png" type="image/png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* ✅ 初始背景色避免白屏 */
+      body, html {
+        margin: 0;
+        padding: 0;
+        background-color: #000; /* 深色背景 */
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+      }
+
+      #root {
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const root = document.getElementById('root');
+        if (root) root.style.opacity = '1'; // ✅ 页面加载完再显示内容
+      });
+    </script>
   </body>
 </html>

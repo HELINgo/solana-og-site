@@ -11,17 +11,20 @@ interface ProjectItem {
   twitter: string;
 }
 
-// 判断是否是 NFT 项目
-const isNFT = (name: string) => {
-  return /nft|art|ape|punk|monkey|collection/i.test(name.toLowerCase());
-};
+const isNFT = (name: string) =>
+  /nft|art|ape|punk|monkey|collection/i.test(name.toLowerCase());
 
 (async () => {
   const filePath = path.join('data', 'fetched_projects.json');
+  if (!fs.existsSync(filePath)) {
+    console.error('❌ 未找到项目数据文件，请先运行 fetchProjectsPlaywright.ts');
+    return;
+  }
+
   const raw = fs.readFileSync(filePath, 'utf-8');
   const projects: ProjectItem[] = JSON.parse(raw);
 
-  const inserted = new Set();
+  const inserted = new Set<string>();
 
   for (const item of projects) {
     const key = `${item.name}-${item.chain}`;
@@ -29,15 +32,14 @@ const isNFT = (name: string) => {
     inserted.add(key);
 
     const score = item.heat + 500;
-    const targetTable = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
-
-    const twitterLink = item.twitter === 'EMPTY'
+    const table = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
+    const twitterLink = item.twitter === '' || item.twitter === 'EMPTY'
       ? `https://twitter.com/${item.name.replace(/^@/, '')}`
       : item.twitter;
 
-    const { error } = await supabase.from(targetTable).upsert({
+    const { error } = await supabase.from(table).upsert({
       name: item.name,
-      chain: item.chain || '未知',
+      chain: item.chain,
       heat: score,
       launch_time: item.launch_time,
       twitter: twitterLink,
@@ -46,7 +48,8 @@ const isNFT = (name: string) => {
     if (error) {
       console.error(`❌ 插入失败: ${item.name}`, error);
     } else {
-      console.log(`✅ 插入成功: ${item.name} -> ${targetTable}`);
+      console.log(`✅ 插入成功: ${item.name} -> ${table}`);
     }
   }
 })();
+

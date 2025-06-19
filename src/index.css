@@ -1,37 +1,26 @@
-:/* 让背景图全屏显示，无边距 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------- 全局基础样式 -------- */
 html, body, #root {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
+  font-family: 'Inter', sans-serif;
+  background: transparent;       /* ✅ 保留页面自身背景图 */
+  color: #fff;
+  overflow-x: hidden;            /* ✅ 可横向隐藏，保留纵向滚动 */
+  overflow-y: auto;
 }
 
-/* WalletMultiButton 默认居右时的样式无冲突 */
+/* WalletMultiButton 兼容样式 */
 button {
   font-family: inherit;
 }
 
-/* 取消原始模板限制 */
-#root {
-  max-width: none;
-  padding: 0;
-  text-align: center;
-}
-
-/* 如果你保留了 logo，可以继续使用 */
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
+/* -------- LOGO 旋转动效 -------- */
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -41,23 +30,63 @@ button {
   }
 }
 
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
+  .logo-animated {
     animation: logo-spin infinite 20s linear;
   }
 }
 
-/* 通用卡片 */
+/* -------- 卡片 + 毛玻璃风格 -------- */
 .card {
   padding: 2em;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 说明文本样式 */
-.read-the-docs {
-  color: #ccc;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
+
+/* -------- 通用说明文本 -------- */
+.read-the-docs {
+  color: #bbb;
+  font-size: 0.9rem;
+}
+
+/* -------- 页面切换动画容器（可选） -------- */
+.page-wrapper {
+  animation: fade-slide-in 0.4s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
