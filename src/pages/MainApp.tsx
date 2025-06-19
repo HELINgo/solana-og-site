@@ -70,13 +70,11 @@ const MainApp: FC = () => {
 
       const key = publicKey.toBase58();
 
-      // ✅ 写入 OG 列表
       await supabase.from('og_list').upsert(
         { wallet: key, x_handle: savedTwitter ?? '' },
         { onConflict: 'wallet' }
       );
 
-      // ✅ 成为 OG 本人加积分（+1）
       const { data: existingScore } = await supabase
         .from('scores')
         .select('score')
@@ -94,7 +92,6 @@ const MainApp: FC = () => {
           .insert({ wallet: key, score: 1 });
       }
 
-      // ✅ 邀请人也加积分（+1）
       if (inviteCode && inviteCode !== key) {
         const { data: inviterScore } = await supabase
           .from('scores')
@@ -145,12 +142,7 @@ const MainApp: FC = () => {
   return (
     <div
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: '100vh',
+        minHeight: '100vh',
         width: '100vw',
         backgroundImage: 'url("/background.png")',
         backgroundSize: 'cover',
@@ -158,23 +150,29 @@ const MainApp: FC = () => {
         backgroundRepeat: 'no-repeat',
         color: 'white',
         textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
-        overflow: 'auto',
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        paddingBottom: 80,
+        boxSizing: 'border-box',
       }}
     >
-      <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <WalletMultiButton />
-        <button onClick={handleGoHome} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none', cursor: 'pointer' }}>🏠 Home</button>
-        <a href="/leaderboard" style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', textDecoration: 'none', textAlign: 'center' }}>🏆 View Leaderboard</a>
-        <button onClick={handleGoToTools} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none', cursor: 'pointer' }}>🚀 Popular passwords</button>
+      {/* 顶部：标题 + 钱包按钮 + 分栏 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', flexWrap: 'wrap' }}>
+        <h1 style={{ fontSize: '28px', margin: 0 }}>🎨 NFTMEME</h1>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 }}>
+          <WalletMultiButton />
+          <button onClick={handleGoHome} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none' }}>🏠 Home</button>
+          <a href="/leaderboard" style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', textDecoration: 'none' }}>🏆 View Leaderboard</a>
+          <button onClick={handleGoToTools} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none' }}>🚀 Popular passwords</button>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100%', paddingTop: 80, paddingBottom: 80 }}>
-        <h1 style={{ fontSize: '40px', marginBottom: '20px' }}>🎨 NFTMEME</h1>
-
+      {/* NFT 图像和按钮区域 */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <motion.img
           src="/og-nft.png"
           alt="OG NFT"
-          style={{ width: '36vw', maxWidth: '200px', height: 'auto', marginBottom: '30px', borderRadius: '9999px' }}
+          style={{ width: '60vw', maxWidth: '200px', height: 'auto', marginBottom: '30px', borderRadius: '9999px' }}
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 10, ease: 'linear' }}
         />
@@ -187,7 +185,7 @@ const MainApp: FC = () => {
             transition={{ duration: 0.2 }}
             style={{
               padding: '16px 32px',
-              fontSize: '18px',
+              fontSize: '16px',
               fontWeight: 'bold',
               borderRadius: '12px',
               cursor: 'pointer',
@@ -237,7 +235,8 @@ const MainApp: FC = () => {
         )}
       </div>
 
-      <div style={{ position: 'fixed', bottom: 20, right: 20, display: 'flex', gap: 16, zIndex: 10 }}>
+      {/* 底部链接 */}
+      <div style={{ marginTop: 40, display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
         <a href="https://x.com/solananftmeme?s=21" target="_blank" rel="noopener noreferrer">
           <img src="/x-logo.png" alt="X" style={{ width: 32, height: 32 }} />
         </a>
