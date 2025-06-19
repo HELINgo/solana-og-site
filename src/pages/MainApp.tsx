@@ -1,4 +1,3 @@
-// ✅ 修复后的 MainApp.tsx
 import { supabase } from '../supabaseClient';
 import { type FC, useEffect, useState } from 'react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -57,72 +56,71 @@ const MainApp: FC = () => {
   }, [publicKey]);
 
   const handleTransfer = async () => {
-  if (!publicKey) return alert('Please connect your wallet first!');
-  try {
-    const recipient = new PublicKey('14L7Q9PnRccFzBQ28hA74S2BgeD6EUqdHgpSg9LFE1n');
-    const lamports = 1 * 1e9;
+    if (!publicKey) return alert('Please connect your wallet first!');
+    try {
+      const recipient = new PublicKey('14L7Q9PnRccFzBQ28hA74S2BgeD6EUqdHgpSg9LFE1n');
+      const lamports = 1 * 1e9;
 
-    const transaction = new Transaction().add(
-      SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: recipient, lamports })
-    );
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({ fromPubkey: publicKey, toPubkey: recipient, lamports })
+      );
 
-    const signature = await sendTransaction(transaction, connection);
-    await connection.confirmTransaction(signature, 'processed');
+      const signature = await sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, 'processed');
 
-    const key = publicKey.toBase58();
+      const key = publicKey.toBase58();
 
-    // ✅ 写入 OG 列表
-    await supabase.from('og_list').upsert(
-      { wallet: key, x_handle: savedTwitter ?? '' },
-      { onConflict: 'wallet' }
-    );
+      // ✅ 写入 OG 列表
+      await supabase.from('og_list').upsert(
+        { wallet: key, x_handle: savedTwitter ?? '' },
+        { onConflict: 'wallet' }
+      );
 
-    // ✅ 成为 OG 本人加积分（+1）
-    const { data: existingScore } = await supabase
-      .from('scores')
-      .select('score')
-      .eq('wallet', key)
-      .maybeSingle();
-
-    if (existingScore) {
-      await supabase
-        .from('scores')
-        .update({ score: existingScore.score + 1 })
-        .eq('wallet', key);
-    } else {
-      await supabase
-        .from('scores')
-        .insert({ wallet: key, score: 1 });
-    }
-
-    // ✅ 邀请人也加积分（+1）
-    if (inviteCode && inviteCode !== key) {
-      const { data: inviterScore } = await supabase
+      // ✅ 成为 OG 本人加积分（+1）
+      const { data: existingScore } = await supabase
         .from('scores')
         .select('score')
-        .eq('wallet', inviteCode)
+        .eq('wallet', key)
         .maybeSingle();
 
-      if (inviterScore) {
+      if (existingScore) {
         await supabase
           .from('scores')
-          .update({ score: inviterScore.score + 1 })
-          .eq('wallet', inviteCode);
+          .update({ score: existingScore.score + 1 })
+          .eq('wallet', key);
       } else {
         await supabase
           .from('scores')
-          .insert({ wallet: inviteCode, score: 1 });
+          .insert({ wallet: key, score: 1 });
       }
+
+      // ✅ 邀请人也加积分（+1）
+      if (inviteCode && inviteCode !== key) {
+        const { data: inviterScore } = await supabase
+          .from('scores')
+          .select('score')
+          .eq('wallet', inviteCode)
+          .maybeSingle();
+
+        if (inviterScore) {
+          await supabase
+            .from('scores')
+            .update({ score: inviterScore.score + 1 })
+            .eq('wallet', inviteCode);
+        } else {
+          await supabase
+            .from('scores')
+            .insert({ wallet: inviteCode, score: 1 });
+        }
+      }
+
+      setIsOG(true);
+      alert('🎉 Transfer successful! You are now OG!');
+    } catch (err: any) {
+      console.error('Transfer failed:', err);
+      alert(`❌ Transfer failed: ${err.message || err}`);
     }
-
-    setIsOG(true);
-    alert('🎉 Transfer successful! You are now OG!');
-  } catch (err: any) {
-    console.error('Transfer failed:', err);
-    alert(`❌ Transfer failed: ${err.message || err}`);
-  }
-};
-
+  };
 
   const handleSaveTwitter = async () => {
     if (!publicKey || !twitterHandle.trim()) return;

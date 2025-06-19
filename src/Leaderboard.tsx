@@ -77,20 +77,25 @@ const Leaderboard: React.FC = () => {
         paddingBottom: 80,
       }}
     >
-      <div style={{ padding: 40 }}>
+      <div style={{ padding: 20, maxWidth: 1200, margin: '0 auto' }}>
         <Link to="/" style={{ color: '#fff', textDecoration: 'underline', fontSize: 14 }}>
           ← Back to Home
         </Link>
 
-        <h1 style={{ fontSize: '36px', textAlign: 'center', marginTop: 20 }}>
+        <h1 style={{ fontSize: '32px', textAlign: 'center', marginTop: 20 }}>
           🏆 OG Leaderboard
         </h1>
 
-        <div style={{ marginTop: 40, maxWidth: 1000, margin: '0 auto' }}>
+        <div style={{ marginTop: 30, overflowX: 'auto', maxWidth: '100%' }}>
           {currentItems.length === 0 ? (
             <p style={{ textAlign: 'center', opacity: 0.8 }}>No scores yet.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <table style={{
+              width: '100%',
+              minWidth: 500,
+              borderCollapse: 'collapse',
+              fontSize: 14
+            }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.4)' }}>
                   <th style={{ textAlign: 'left', padding: 12 }}>#</th>
@@ -101,13 +106,10 @@ const Leaderboard: React.FC = () => {
               </thead>
               <tbody>
                 {currentItems.map(([wallet, score], index) => (
-                  <tr
-                    key={wallet}
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.1)',
-                      transition: 'background 0.3s',
-                    }}
-                  >
+                  <tr key={wallet} style={{
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    transition: 'background 0.3s',
+                  }}>
                     <td style={{ padding: 12 }}>{startIndex + index + 1}</td>
                     <td style={{ padding: 12 }}>{wallet.slice(0, 4)}...{wallet.slice(-4)}</td>
                     <td style={{ padding: 12, textAlign: 'right' }}>{score}</td>
@@ -132,13 +134,18 @@ const Leaderboard: React.FC = () => {
           )}
         </div>
 
-        {/* Pagination */}
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
+        <div style={{
+          textAlign: 'center',
+          marginTop: 40,
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: 8
+        }}>
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
             style={{
-              margin: '0 6px',
               padding: '8px 16px',
               background: 'transparent',
               border: '1px solid white',
@@ -156,7 +163,6 @@ const Leaderboard: React.FC = () => {
               key={i}
               onClick={() => goToPage(i + 1)}
               style={{
-                margin: '0 4px',
                 padding: '8px 16px',
                 background: currentPage === i + 1 ? '#8b5cf6' : 'transparent',
                 border: '1px solid white',
@@ -175,7 +181,6 @@ const Leaderboard: React.FC = () => {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             style={{
-              margin: '0 6px',
               padding: '8px 16px',
               background: 'transparent',
               border: '1px solid white',
