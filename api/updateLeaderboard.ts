@@ -1,78 +1,14 @@
 // api/updateLeaderboard.ts
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { chromium } from 'playwright';
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const CRON_SECRET = process.env.CRON_SECRET!; // ✅ 改对了！
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-const isNFT = (name: string) =>
-  /nft|art|ape|punk|monkey|collection/i.test(name.toLowerCase());
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { fetchProjects } from '../scripts/fetchTwitterProjects';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const auth = req.headers.authorization;
-  if (!auth || auth !== `Bearer ${CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    await fetchProjects();
+    res.status(200).json({ success: true, message: 'Leaderboard updated successfully' });
+  } catch (err: any) {
+    console.error('❌ Update failed:', err);
+    res.status(500).json({ success: false, error: err.message || 'Unknown error' });
   }
-
-  console.log('⏳ 开始抓取项目...');
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.goto('https://lunarcrush.com/categories/cryptocurrencies', { timeout: 60000 });
-  await page.waitForTimeout(3000);
-
-  const rows = await page.$$('[data-testid^="marketRowName_"]');
-  if (!rows || rows.length === 0) {
-    await browser.close();
-    console.error('❌ 未找到任何项目行');
-    return res.status(500).json({ error: '抓取失败，页面结构变化' });
-  }
-
-  const projects = await Promise.all(rows.slice(0, 20).map(async (row, i) => {
-    const name = (await row.textContent())?.trim() || `项目${i + 1}`;
-    return {
-      name,
-      chain: 'SOL',
-      heat: Math.floor(Math.random() * 10000),
-      launch_time: new Date().toISOString(),
-      twitter: `https://twitter.com/${name.replace(/^@/, '')}`
-    };
-  }));
-
-  await browser.close();
-
-  let successCount = 0;
-  let failCount = 0;
-  const inserted = new Set();
-
-  for (const item of projects) {
-    const key = `${item.name}-${item.chain}`;
-    if (inserted.has(key)) continue;
-    inserted.add(key);
-
-    const score = item.heat + 500;
-    const table = isNFT(item.name) ? 'nft_leaderboard' : 'token_leaderboard';
-
-    const { error } = await supabase.from(table).upsert({
-      name: item.name,
-      chain: item.chain,
-      heat: score,
-      launch_time: item.launch_time,
-      twitter: item.twitter,
-    });
-
-    if (error) {
-      console.error(`❌ 插入失败: ${item.name}`, error);
-      failCount++;
-    } else {
-      console.log(`✅ 插入成功: ${item.name} → ${table}`);
-      successCount++;
-    }
-  }
-
-  res.status(200).json({ message: '更新完成', successCount, failCount });
 }
 
