@@ -1,14 +1,19 @@
-// api/updateLeaderboard.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { fetchProjects } from '../scripts/fetchTwitterProjects';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    await fetchProjects();
-    res.status(200).json({ success: true, message: 'Leaderboard updated successfully' });
-  } catch (err: any) {
-    console.error('❌ Update failed:', err);
-    res.status(500).json({ success: false, error: err.message || 'Unknown error' });
+    // ✅ 动态导入，确保兼容 TS 模块
+    const module = await import('../../scripts/fetchTwitterProjects');
+    const fetchTwitterProjects = module.fetchTwitterProjects;
+
+    if (typeof fetchTwitterProjects !== 'function') {
+      throw new Error('fetchTwitterProjects is not a function');
+    }
+
+    await fetchTwitterProjects();
+    res.status(200).json({ success: true, message: '✅ Leaderboard updated' });
+  } catch (error) {
+    console.error('❌ 更新失败:', error);
+    res.status(500).json({ success: false, error: String(error) });
   }
 }
-

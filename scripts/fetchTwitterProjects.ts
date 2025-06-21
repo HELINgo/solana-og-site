@@ -15,7 +15,7 @@ const SEARCH_TERMS = [
 ];
 const MAX_RESULTS = 30;
 
-export async function fetchTwitterProjects() {
+export async function fetchTwitterProjects(): Promise<void> {
   const query = SEARCH_TERMS.map(t => `"${t}"`).join(' OR ');
   const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)} -is:retweet lang:en&max_results=${MAX_RESULTS}&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,name,profile_image_url`;
 
@@ -38,7 +38,10 @@ export async function fetchTwitterProjects() {
       const name = user.name;
       const createdAt = tweet.created_at;
       const metrics = tweet.public_metrics;
-      const heat = metrics.like_count + metrics.retweet_count + metrics.reply_count;
+      const heat =
+        (metrics.like_count || 0) +
+        (metrics.retweet_count || 0) +
+        (metrics.reply_count || 0);
 
       const isToken = /token|fairlaunch|stealth|launch/i.test(text);
       const isNFT = /nft|pfp|mint/i.test(text);
@@ -66,7 +69,7 @@ export async function fetchTwitterProjects() {
   }
 }
 
-// ✅ 允许在命令行运行：npx tsx scripts/fetchTwitterProjects.ts
+// ✅ 允许被导入，也可独立执行
 if (require.main === module) {
   fetchTwitterProjects();
 }
