@@ -1,3 +1,4 @@
+// api/updateLeaderboard.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { createClient } from '@supabase/supabase-js';
@@ -15,12 +16,16 @@ const MAX_RESULTS = 30;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    // ✅ 打印 token 开头调试（仅用于临时调试，请部署后删除）
+    console.log('🔐 BEARER_TOKEN starts with:', BEARER_TOKEN?.slice(0, 10));
+
     const query = SEARCH_TERMS.map(t => `"${t}"`).join(' OR ');
     const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)} -is:retweet lang:en&max_results=${MAX_RESULTS}&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,name,profile_image_url`;
 
     const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${BEARER_TOKEN}` }
-    });
+  headers: { Authorization: BEARER_TOKEN } // ✅ 这里直接使用环境变量
+});
+
 
     const tweets = response.data.data;
     const users = response.data.includes?.users || [];
