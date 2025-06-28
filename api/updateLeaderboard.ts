@@ -14,23 +14,34 @@ const SEARCH_TERMS = [
 ];
 const MAX_RESULTS = 30;
 
+interface Project {
+  name: string;
+  twitter: string;
+  launch_time: string;
+  heat: number;
+  intro?: string;
+  logo?: string;
+  chain?: string;
+  type: 'token' | 'nft';
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // ✅ 打印 token 开头调试（仅用于临时调试，请部署后删除）
-    console.log('🔐 BEARER_TOKEN starts with:', BEARER_TOKEN?.slice(0, 10));
+    console.log('🔐 BEARER_TOKEN starts with:', BEARER_TOKEN?.slice(0, 10)); // 可部署后删除
 
     const query = SEARCH_TERMS.map(t => `"${t}"`).join(' OR ');
     const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)} -is:retweet lang:en&max_results=${MAX_RESULTS}&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,name,profile_image_url`;
 
     const response = await axios.get(url, {
-  headers: { Authorization: BEARER_TOKEN } // ✅ 这里直接使用环境变量
-});
-
+      headers: {
+        Authorization: `Bearer ${BEARER_TOKEN}`,
+      },
+    });
 
     const tweets = response.data.data;
     const users = response.data.includes?.users || [];
 
-    const projects: any[] = [];
+    const projects: Project[] = [];
 
     for (const tweet of tweets) {
       const user = users.find(u => u.id === tweet.author_id);
@@ -48,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const isLaunched = /already live|now live|on uniswap|trading now|chart/i.test(text);
 
       if ((isToken || isNFT) && !isLaunched && username) {
-        const project = {
+        projects.push({
           name: name || username,
           twitter: `https://x.com/${username}`,
           launch_time: createdAt,
@@ -56,9 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           intro: text.slice(0, 160),
           logo: user.profile_image_url,
           chain: 'X',
-          type: isNFT ? 'nft' : 'token'
-        };
-        projects.push(project);
+          type: isNFT ? 'nft' : 'token',
+        });
       }
     }
 
@@ -80,8 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     res.status(200).json({ success: true, message: `✅ Updated ${projects.length} projects` });
-  } catch (error) {
-    console.error('❌ 更新失败:', error);
-    res.status(500).json({ success: false, error: String(error) });
+  } catch (error: any) {
+    console.error('❌ 更新失败:', error?.response?.data || error.message || error);
+    res.status(500).json({ success: false, error: error?.response?.data || String(error) });
   }
 }

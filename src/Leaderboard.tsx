@@ -5,7 +5,7 @@ import { supabase } from './supabaseClient';
 const ITEMS_PER_PAGE = 25;
 
 const Leaderboard: React.FC = () => {
-  const [scores, setScores] = useState<{ [wallet: string]: number }>({});
+  const [scores, setScores] = useState<{ wallet: string; score: number }[]>([]);
   const [twitterMap, setTwitterMap] = useState<{ [wallet: string]: string }>({});
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -20,16 +20,7 @@ const Leaderboard: React.FC = () => {
         .from('twitter_handles')
         .select('wallet, handle');
 
-      const scoreMap: { [wallet: string]: number } = {};
       const twMap: { [wallet: string]: string } = {};
-
-      if (scoreData) {
-        for (const item of scoreData) {
-          if (item.wallet && typeof item.score === 'number') {
-            scoreMap[item.wallet] = item.score;
-          }
-        }
-      }
 
       if (twitterData) {
         for (const item of twitterData) {
@@ -39,17 +30,16 @@ const Leaderboard: React.FC = () => {
         }
       }
 
-      setScores(scoreMap);
+      setScores(scoreData || []);
       setTwitterMap(twMap);
     };
 
     fetchLeaderboard();
   }, []);
 
-  const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const totalPages = Math.ceil(sortedScores.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(scores.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = sortedScores.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentItems = scores.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const goToPage = useCallback((page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -95,33 +85,36 @@ const Leaderboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map(([wallet, score], index) => (
-                  <tr
-                    key={wallet}
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.1)',
-                      transition: 'background 0.3s',
-                    }}
-                  >
-                    <td style={{ padding: 12 }}>{startIndex + index + 1}</td>
-                    <td style={{ padding: 12 }}>{wallet.slice(0, 4)}...{wallet.slice(-4)}</td>
-                    <td style={{ padding: 12, textAlign: 'right' }}>{score}</td>
-                    <td style={{ padding: 12, textAlign: 'center' }}>
-                      {twitterMap[wallet] ? (
-                        <a
-                          href={`https://x.com/${twitterMap[wallet]}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: '#1DA1F2', textDecoration: 'underline', fontSize: 13 }}
-                        >
-                          @{twitterMap[wallet]}
-                        </a>
-                      ) : (
-                        <span style={{ opacity: 0.3 }}>—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {currentItems.map((item, index) => {
+                  const { wallet, score } = item;
+                  return (
+                    <tr
+                      key={wallet}
+                      style={{
+                        borderBottom: '1px solid rgba(255,255,255,0.1)',
+                        transition: 'background 0.3s',
+                      }}
+                    >
+                      <td style={{ padding: 12 }}>{startIndex + index + 1}</td>
+                      <td style={{ padding: 12 }}>{wallet.slice(0, 4)}...{wallet.slice(-4)}</td>
+                      <td style={{ padding: 12, textAlign: 'right' }}>{score}</td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        {twitterMap[wallet] ? (
+                          <a
+                            href={`https://x.com/${twitterMap[wallet]}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#1DA1F2', textDecoration: 'underline', fontSize: 13 }}
+                          >
+                            @{twitterMap[wallet]}
+                          </a>
+                        ) : (
+                          <span style={{ opacity: 0.3 }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -185,3 +178,4 @@ const Leaderboard: React.FC = () => {
 };
 
 export default Leaderboard;
+

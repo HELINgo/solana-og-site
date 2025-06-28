@@ -1,51 +1,67 @@
-// scripts/fetchTwitterProjects.ts
+// ✅ scripts/fetchTwitterProjects.ts
 import axios from 'axios';
 import * as dotenv from 'dotenv';
-import { saveProjects, Project } from './saveToSupabase';
+import { createClient } from '@supabase/supabase-js';
+import { Project } from './saveToSupabase';
+
 dotenv.config();
 
 const BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN!;
-const SEARCH_TERMS = [
-  'fairlaunch',
-  'launch soon',
-  'new token',
-  'mint soon',
-  'stealth',
-  'airdrop'
-];
-const MAX_RESULTS = 30;
+const SUPABASE_URL = process.env.SUPABASE_URL!;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+const SEARCH_TERMS = Array.from(new Set([
+  'solana', 'eth', 'ethereum', 'bsc', 'arbitrum', 'base',
+  'memes', 'meme', 'nft', 'nfts', 'nftmeme',
+  'new token', 'token launch', 'mint soon', 'mint date', 'nft drop',
+  'fair launch', 'new nft', 'airdrop soon', 'wl spot', 'presale',
+  'stealth launch', 'token presale', 'public mint', 'claim nft',
+  'mint live', 'launch today', 'pre mint', 'solanameme', 'ethmeme'
+]));
+
+const MAX_RESULTS = 100;
 
 export async function fetchTwitterProjects(): Promise<void> {
-  const query = SEARCH_TERMS.map(t => `"${t}"`).join(' OR ');
-  const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)} -is:retweet lang:en&max_results=${MAX_RESULTS}&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,name,profile_image_url`;
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const start_time = sevenDaysAgo.toISOString();
+
+  const query = `${SEARCH_TERMS.map(t => `"${t}"`).join(' OR ')} -is:retweet -is:quote lang:en`;
+  const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)}&start_time=${start_time}&max_results=${MAX_RESULTS}&tweet.fields=created_at,public_metrics&expansions=author_id&user.fields=username,name,profile_image_url`;
 
   try {
     const res = await axios.get(url, {
-      headers: { Authorization: `Bearer ${BEARER_TOKEN}` }
+      headers: {
+        Authorization: `Bearer ${BEARER_TOKEN}`
+      }
     });
 
-    const tweets = res.data.data;
+    const tweets = res.data.data || [];
     const users = res.data.includes?.users || [];
-
-    const projects: Project[] = [];
+    const allProjects: Project[] = [];
 
     for (const tweet of tweets) {
       const user = users.find(u => u.id === tweet.author_id);
       if (!user) continue;
 
-      const text = tweet.text;
-      const username = user.username;
+      const text = tweet.text?.toLowerCase() || '';
+      const username = user.username.toLowerCase();
       const name = user.name;
       const createdAt = tweet.created_at;
       const metrics = tweet.public_metrics;
-      const heat =
-        (metrics.like_count || 0) +
-        (metrics.retweet_count || 0) +
-        (metrics.reply_count || 0);
+      const like = metrics.like_count || 0;
+      const retweet = metrics.retweet_count || 0;
+      const heat = like + retweet;
 
-      const isToken = /token|fairlaunch|stealth|launch/i.test(text);
-      const isNFT = /nft|pfp|mint/i.test(text);
-      const isLaunched = /already live|now live|on uniswap|trading now|chart/i.test(text);
+      if (heat < 1) continue;
+
+      // ✅ 项目关键词判断
+      const isToken = /token|launch|fairlaunch|erc20|presale|solana|bsc|eth/.test(text);
+      const isNFT = /nft|mint|drop|collection|airdrop|wl|meme/.test(text);
+      const isLaunched = /already live|now live|on uniswap|chart|cmc/.test(text);
+
+      
 
       if ((isToken || isNFT) && !isLaunched && username) {
         const project: Project = {
@@ -53,23 +69,38 @@ export async function fetchTwitterProjects(): Promise<void> {
           twitter: `https://x.com/${username}`,
           launch_time: createdAt,
           heat,
-          intro: text.slice(0, 160),
+          intro: tweet.text.slice(0, 160),
           logo: user.profile_image_url,
           chain: 'X',
           type: isNFT ? 'nft' : 'token'
         };
-        projects.push(project);
+        allProjects.push(project);
       }
     }
 
-    console.log(`✅ 共抓取到 ${projects.length} 个未上线项目`);
-    await saveProjects(projects);
+    const topProjects = allProjects.sort((a, b) => b.heat - a.heat).slice(0, 20);
+    console.log(`✅ 共筛选出 ${topProjects.length} 条热门项目`);
+
+    for (const project of topProjects) {
+      const table = project.type === 'nft' ? 'nft_leaderboard' : 'token_leaderboard';
+      const { data: existing } = await supabase
+        .from(table)
+        .select('heat')
+        .eq('twitter', project.twitter)
+        .single();
+
+      if (!existing || project.heat > existing.heat) {
+        await supabase.from(table).upsert(project, { onConflict: ['twitter'] });
+        console.log(`✅ 已保存/更新：${project.twitter}`);
+      } else {
+        console.log(`⏭️ 已存在且热度更高或相同：${project.twitter}`);
+      }
+    }
   } catch (err) {
     console.error('❌ 抓取失败:', err);
   }
 }
 
-// ✅ 允许被导入，也可独立执行
 if (require.main === module) {
   fetchTwitterProjects();
 }

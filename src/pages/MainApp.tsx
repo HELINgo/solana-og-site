@@ -164,6 +164,9 @@ const MainApp: FC = () => {
           <button onClick={handleGoHome} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none' }}>🏠 Home</button>
           <a href="/leaderboard" style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', textDecoration: 'none' }}>🏆 View Leaderboard</a>
           <button onClick={handleGoToTools} style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', border: 'none' }}>🚀 Popular passwords</button>
+          <a href="/lottery" style={{ padding: '6px 12px', borderRadius: 8, background: '#333', color: 'white', textDecoration: 'none' }}>
+  🎰 Lottery scratch-offs
+</a>
         </div>
       </div>
 
