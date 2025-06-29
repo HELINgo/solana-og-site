@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "draw": "node --loader ts-node/esm autoDrawWinner.ts",
-    "next": "node --loader ts-node/esm createNextRound.ts"
+    "next": "node --loader ts-node/esm createNextRound.ts",
+    "start": "node --loader ts-node/esm autoDrawWinner.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.5",
