@@ -23,11 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // ✅ 每张彩票 0.03 积分
     const totalScore = count * 0.03;
 
-    // ✅ 调用积分函数
-    const { error } = await supabase.rpc('add_or_update_score', {
+    // ✅ 调用积分函数并打印返回结果
+    const { data, error } = await supabase.rpc('add_or_update_score', {
       addr: wallet,
       delta: totalScore,
     });
+
+    console.log('📤 Supabase RPC 返回:', { data, error }); // ✅ 添加调试日志
 
     if (error) {
       console.error('❌ 积分函数调用失败:', error);

@@ -1,0 +1,28 @@
+{
+  "title": "🎉 Last Round Winner",
+  "last_winner": "🎉 Last Round Winner",
+  "buyAmountLabel": "🎯 Ticket Count (max 10):",
+  "buy_quantity": "Ticket Count (max 10)",
+  "buyNow": "🎟 Buy Now",
+  "buy_now": "Buy Now",
+  "buying": "Buying...",
+  "bindXLabel": "Bind your X account:",
+  "bind_x": "Bind your X account:",
+  "bind": "Bind",
+  "bind_btn": "Bind",
+  "boundX": "✅ Bound X: @{{x}}",
+  "connectWallet": "Please connect wallet first",
+  "pleaseInputX": "Please enter your X username",
+  "bindSuccess": "✅ Bind success",
+  "bind_success": "✅ Bound X: ",
+  "bindFailed": "❌ Bind failed",
+  "backToHome": "Back to Home",
+  "back_home": "Back to Home",
+  "currentPool": " Pool Balance:",
+  "pool": "Pool",
+  "walletBalance": "🪙 Wallet Balance:",
+  "wallet_balance": "Wallet Balance",
+  "timeLeft": " Time left:",
+  "countdown": "Time left"
+}
+

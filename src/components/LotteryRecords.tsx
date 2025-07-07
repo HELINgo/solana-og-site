@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { fetchCurrentRoundId } from '../utils/fetchCurrentRoundId';
+import toast from 'react-hot-toast'; // ✅ 添加 toast 提示
 
 interface RecordEntry {
   wallet: string;
@@ -15,49 +17,30 @@ const LotteryRecords = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchCurrentRoundId = async (): Promise<string | null> => {
-    const now = new Date().toISOString();
-    const { data, error } = await supabase
-      .from('lottery_rounds')
-      .select('id')
-      .lte('start_time', now)
-      .gte('end_time', now)
-      .maybeSingle();
-
-    if (error || !data) {
-      console.error('获取当前轮次失败:', error);
-      return null;
-    }
-    return data.id;
-  };
-
   const fetchRecords = async (page: number) => {
     const roundId = await fetchCurrentRoundId();
-    if (!roundId) return;
+    if (!roundId) {
+      console.error('❌ 无法获取当前轮次 ID');
+      return;
+    }
 
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    // 获取当前页数据
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('lottery_entries')
       .select('wallet, ticket_number, x, created_at', { count: 'exact' })
       .eq('round_id', roundId)
       .order('created_at', { ascending: false })
       .range(from, to);
 
-    // 获取总条数
-    const { count } = await supabase
-      .from('lottery_entries')
-      .select('*', { count: 'exact', head: true })
-      .eq('round_id', roundId);
-
     if (error) {
-      console.error('读取记录失败:', error);
-    } else {
-      setRecords(data || []);
-      setTotalPages(Math.ceil((count || 0) / PAGE_SIZE));
+      console.error('❌ 获取购买记录失败:', error.message);
+      return;
     }
+
+    setRecords(data || []);
+    setTotalPages(Math.ceil((count || 0) / PAGE_SIZE));
   };
 
   useEffect(() => {
@@ -68,24 +51,33 @@ const LotteryRecords = () => {
 
   return (
     <div className="bg-white/10 p-6 rounded-2xl shadow-xl">
-      <h2 className="text-xl font-bold mb-4">🖊 当前轮购买记录（24小时）</h2>
+      <h2 className="text-xl font-bold mb-4">🖊 Current round of purchase records (24 hours）</h2>
       {records.length === 0 ? (
-        <p className="text-gray-400">暂无记录</p>
+        <p className="text-gray-400">No record yet</p>
       ) : (
         <>
           <table className="w-full text-sm mb-4">
             <thead>
               <tr className="text-white border-b border-white/20">
-                <th className="py-2 text-left">地址</th>
-                <th className="py-2 text-left">X 账号</th>
-                <th className="py-2 text-left">彩票号码</th>
-                <th className="py-2 text-left">时间</th>
+                <th className="py-2 text-left">address</th>
+                <th className="py-2 text-left">X Account</th>
+                <th className="py-2 text-left">Scratch Card Number</th>
+                <th className="py-2 text-left">time</th>
               </tr>
             </thead>
             <tbody>
               {records.map((entry, i) => (
                 <tr key={i} className="border-b border-white/10">
-                  <td className="py-2 text-purple-300">{entry.wallet.slice(0, 4)}..{entry.wallet.slice(-4)}</td>
+                  <td
+                    className="py-2 text-purple-300 cursor-pointer"
+                    title={entry.wallet}
+                    onClick={() => {
+                      navigator.clipboard.writeText(entry.wallet);
+                      toast.success('Purchase address copied');
+                    }}
+                  >
+                    {entry.wallet.slice(0, 4)}..{entry.wallet.slice(-4)}
+                  </td>
                   <td className="py-2 text-indigo-300">
                     {entry.x ? (
                       <a href={`https://x.com/${entry.x}`} target="_blank" rel="noopener noreferrer">@{entry.x}</a>
@@ -116,15 +108,15 @@ const LotteryRecords = () => {
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               className="bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
             >
-              上一页
+              Previous page
             </button>
-            <span className="text-white pt-2">第 {currentPage} 页 / 共 {totalPages} 页</span>
+
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               className="bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
             >
-              下一页
+              Next page
             </button>
           </div>
         </>
@@ -134,4 +126,6 @@ const LotteryRecords = () => {
 };
 
 export default LotteryRecords;
+
+
 

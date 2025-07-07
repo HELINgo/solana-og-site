@@ -49,11 +49,11 @@ const LotteryHistory = () => {
   return (
     <div className="bg-white/10 p-6 rounded-2xl shadow-xl text-white">
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        📜 历史开奖记录
+        📜 Historical lottery records
       </h2>
 
       {records.length === 0 ? (
-        <p className="text-gray-400">暂无记录</p>
+        <p className="text-gray-400">No record yet</p>
       ) : (
         <div className="space-y-3">
           {records.map((item) => (
@@ -67,7 +67,7 @@ const LotteryHistory = () => {
                   className="cursor-pointer text-purple-300 hover:underline"
                   onClick={() => {
                     navigator.clipboard.writeText(item.wallet);
-                    alert('地址已复制：' + item.wallet);
+                    alert('Address copied：' + item.wallet);
                   }}
                 >
                   {item.wallet.slice(0, 4)}...{item.wallet.slice(-4)}
@@ -86,7 +86,7 @@ const LotteryHistory = () => {
                     @{item.twitter}
                   </a>
                 ) : (
-                  <span className="text-gray-400">未绑定</span>
+                  <span className="text-gray-400">Not bound</span>
                 )}
               </div>
 
@@ -109,31 +109,48 @@ const LotteryHistory = () => {
         </div>
       )}
 
-      {/* 分页按钮 */}
+      {/* ✅ Pagination buttons */}
       <div className="flex justify-center mt-6 gap-4">
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
           className="px-4 py-2 bg-gray-700 rounded-lg disabled:opacity-50"
         >
-          上一页
+          Previous page
         </button>
-        <span className="text-sm text-white">
-          第 {page} 页 / 共 {totalPages} 页
-        </span>
+        <span className="text-sm text-white"></span>
         <button
           onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
           disabled={page === totalPages}
           className="px-4 py-2 bg-gray-700 rounded-lg disabled:opacity-50"
         >
-          下一页
+          Next page
         </button>
-      </div>
-    </div>
+      </div> {/* ✅ Pagination end */}
+
+      {/* ✅ Scratch Card Rules section */}
+      <div className="mt-10 text-white text-center px-4">
+        <h2 className="text-2xl font-bold mb-4">🎮 Scratch Card Rules 🎮</h2>
+        <div className="max-w-3xl mx-auto text-left text-sm sm:text-base leading-snug sm:leading-relaxed space-y-1">
+  <p>1. Scratch Card is a brand new entertainment and leisure game on SOLANA 🎮 aims to make every player happy 🥳 help players relax 😎 and earn points.</p>
+  <p>2. Each round of scratch card is 24 hours. Every 24 hours, the lucky number will be automatically selected and the prize will be taken away 💰</p>
+  <p>3. Each player can buy 1-10 lucky numbers at a price of 0.01 SOL.</p>
+  <p>4. Players will transfer SOL to the fund pool by purchasing numbers. In each round, one player will take away 95% of the prize pool. The remaining 5% will continue to remain in the prize pool for the next round. The initial balance is 5%.</p>
+  <p>5. Each number purchased can get 0.03 points, which can be viewed in the points ranking list.</p>
+  <p>6. The scratch card game guarantees a series of fairness. The code will be open source. Nothing more than to manipulate everything.</p>
+  <p>7. Scratch cards are only used for entertainment and leisure games 🎮 It is prohibited to engage in illegal activities through scratch cards. We will keep evidence and cooperate with relevant departments.</p>
+</div>
+
+      </div> {/* ✅ Rules outer container */}
+
+   {/* ✅ Outer return container */}
+</div>
+
   );
 };
 
 export default LotteryHistory;
+
 
 
 

@@ -2,6 +2,7 @@ import './style.css'
 import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
+import './i18n'; // 最上方引入
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>

@@ -14,6 +14,8 @@ import { supabase } from '../lib/supabase';
 import LotteryRecords from '../components/LotteryRecords';
 import LotteryHistory from '../components/LotteryHistory';
 import LastWinner from '../components/LastWinner';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n'; // 确保路径正确
 
 const PROGRAM_ADDRESS = '97WhTiopMEqN8mf8hdrWq78nLn3FbMwAiBdm4DEwpyaq';
 const BACKEND_DEV_ADDRESS = '14L7Q9PnRccFzBQ28hA74S2BgeD6EUqdHgpSg9LFE1n';
@@ -28,6 +30,7 @@ const Lottery = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [hasReloaded, setHasReloaded] = useState(false);
+  const { t } = useTranslation(); 
 
   const connection = new Connection("https://mainnet.helius-rpc.com/?api-key=93707546-ed51-468e-ad92-7399bef01649");
 
@@ -85,33 +88,34 @@ const Lottery = () => {
   }, [publicKey]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('lottery_rounds')
-        .select('end_time')
-        .gt('end_time', new Date().toISOString())
-        .order('end_time', { ascending: true })
-         .limit(1)
-         .maybeSingle();
+  const interval = setInterval(async () => {
+    const { data } = await supabase
+      .from('lottery_rounds')
+      .select('end_time')
+      .eq('status', 'open')
+      .order('start_time', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
+    if (data && data.end_time) {
+      const rawEndTime = new Date(data.end_time);
+      const beijingEndTime = new Date(rawEndTime.getTime() + 8 * 60 * 60 * 1000);
+      const now = new Date();
+      const secondsLeft = Math.floor((beijingEndTime.getTime() - now.getTime()) / 1000);
+      setTimeLeft(secondsLeft);
 
-
-      if (data && data.end_time) {
-        const rawEndTime = new Date(data.end_time);
-        const beijingEndTime = new Date(rawEndTime.getTime() + 8 * 60 * 60 * 1000);
-        const now = new Date();
-        const secondsLeft = Math.floor((beijingEndTime.getTime() - now.getTime()) / 1000);
-        setTimeLeft(secondsLeft);
-
-        if (secondsLeft <= 0 && !hasReloaded) {
-          setHasReloaded(true);
+      if (secondsLeft <= 0 && !hasReloaded) {
+        setHasReloaded(true);
+        setTimeout(() => {
           window.location.reload();
-        }
+        }, 3000); // ✅ 延迟 3 秒刷新，避免 Supabase 数据延迟未更新时误刷
       }
-    }, 1000);
+    }
+  }, 1000);
 
-    return () => clearInterval(interval);
-  }, [hasReloaded]);
+  return () => clearInterval(interval); // ✅ 正确放置在 useEffect 外层 return 位置
+}, [hasReloaded]);
+
 
   const formatTime = (seconds: number) => {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -207,26 +211,22 @@ const Lottery = () => {
         x: savedX,
       }));
 
-      const { error } = await supabase.from('lottery_entries').insert(insertData);
+            const { error } = await supabase.from('lottery_entries').insert(insertData);
       if (error) {
         console.error(error);
         toast.error('❌ 分配失败');
       } else {
         toast.success(`🎉 分配号码：${ticketNumbers.join(', ')}`);
-        // ✅ 新增：通知后端更新积分
-  try {
-    await fetch('/api/addEntry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        wallet: publicKey.toBase58(),
-        count: buyCount,
-      }),
-    });
-  } catch (e) {
-    console.error('积分写入失败', e);
-  }
-}
+        
+        // ✅ 积分更新调用
+        try {
+          const { updateScore } = await import('../utils/updateScore'); // 动态引入
+          await updateScore(publicKey.toBase58(), buyCount);
+        } catch (err) {
+          console.error('积分写入失败', err);
+        }
+      }
+
     } catch (err) {
       console.error('转账失败', err);
       toast.error('❌ 转账失败');
@@ -245,27 +245,64 @@ const Lottery = () => {
       }}>
       <div className="absolute inset-0 bg-black bg-opacity-60 z-0" />
 
-      <div className="fixed top-4 right-4 z-20">
-        <WalletMultiButton />
-      </div>
+      <div className="fixed top-2 left-1/2 transform -translate-x-1/2 z-40 text-center">
+  <h2 className="text-2xl font-semibold text-yellow-300 mb-2">{t('🎉lastwinner')}</h2>
+  <LastWinner />
+</div>
 
-      <div className="fixed top-[3.5rem] right-4 z-10 bg-white/10 text-white px-4 py-3 rounded-xl shadow-lg text-sm space-y-1">
-        <p>🏆 当前奖池：<span className="text-yellow-300 font-semibold">{poolBalance.toFixed(2)} SOL</span></p>
-        <p>🪙 钱包余额：<span className="text-green-300">{walletBalance.toFixed(3)} SOL</span></p>
-        <p>⏳ 距开奖：<span className="text-blue-300">{formatTime(timeLeft)}</span></p>
-      </div>
+  <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+  {/* 钱包连接按钮 */}
+  <WalletMultiButton />
 
-      <div className="text-center mt-6 mb-10">
-        <h2 className="text-2xl font-semibold text-yellow-300 mb-2">🎉 上一轮中奖结果</h2>
-        <LastWinner />
-      </div>
+  {/* 返回主页按钮 */}
+  <a
+    href="/"
+    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-2 rounded-xl shadow hover:scale-105 transition-transform"
+  >
+    {t('back_home')}
+  </a>
+</div>
+
+
+
+{/* 顶部钱包按钮 + 返回主页 */}
+<div className="px-4 pt-4">
+  <div className="flex items-center gap-3">
+    <WalletMultiButton />
+    <a
+      href="/"
+      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-2 rounded-xl shadow hover:scale-105 transition-transform"
+    >
+      {t('back_home')}
+    </a>
+    <select
+  value={i18n.language} // ✅ 关键点在这里
+  onChange={(e) => i18n.changeLanguage(e.target.value)}
+  className="bg-black/60 text-white border border-white/30 px-3 py-1 rounded-xl shadow"
+>
+  <option value="zh">Chinese</option>
+  <option value="en">English</option>
+</select>
+
+
+  </div>
+
+  {/* 👇 移到下方靠左显示 */}
+  <div className="mt-3 bg-white/10 text-white px-4 py-3 rounded-xl shadow text-sm space-y-1 w-fit">
+    <p>{t('pool')}<span className="text-yellow-300 font-semibold">{poolBalance.toFixed(2)} SOL</span></p>
+    <p>🪙 {t('walletbalance')}：<span className="text-green-300">{walletBalance.toFixed(3)} SOL</span></p>
+    <p> {t('countdown')}<span className="text-blue-300">{formatTime(timeLeft)}</span></p>
+  </div>
+</div>
+
+
 
       {connected && (
         <>
           {/* 购票卡片 */}
           <div className="flex justify-center mt-[30px] mb-[20px]">
             <div className="bg-white/10 p-6 rounded-2xl shadow-xl max-w-xl w-full">
-              <label className="block mb-3 text-white font-medium text-sm">🎯 购买数量（最多10）：</label>
+              <label className="block mb-3 text-white font-medium text-sm"> {t('buy_quantity')}</label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
@@ -280,7 +317,7 @@ const Lottery = () => {
                   disabled={loading}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl shadow-md hover:scale-105 transition-transform"
                 >
-                  {loading ? '购买中...' : '🎟 立即购买彩票刮刮卡'}
+                  {loading ? t('buying') : ` ${t('buy_now')}`}
                 </button>
               </div>
             </div>
@@ -290,10 +327,10 @@ const Lottery = () => {
           <div className="flex justify-center">
             <div className="bg-white/10 p-6 rounded-2xl mb-12 max-w-2xl w-full shadow-xl">
               {savedX ? (
-                <p className="text-green-400 font-medium">✅ 已绑定 X：@{savedX}</p>
+                <p className="text-green-400 font-medium"> {t('bind_success')}@{savedX}</p>
               ) : (
                 <>
-                  <label className="block mb-2 text-white font-semibold">绑定你的 X 账号：</label>
+                  <label className="block mb-2 text-white font-semibold">{t('bind_x')}</label>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="text"
@@ -306,7 +343,7 @@ const Lottery = () => {
                       onClick={handleBindX}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold"
                     >
-                      绑定
+                      {t('bind_btn')}
                     </button>
                   </div>
                 </>

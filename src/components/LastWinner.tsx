@@ -31,10 +31,10 @@ const LastWinner = () => {
     <div className="flex justify-center mt-6 mb-6">
       <div className="bg-gradient-to-r from-yellow-600 via-pink-500 to-purple-600 text-white px-6 py-4 rounded-2xl shadow-xl text-center w-full max-w-3xl">
         <p className="text-lg font-medium">
-          🎯 幸运号码：<span className="font-extrabold text-white">{winner.number}</span>
+          🎯 Scratch Card Lucky Number：<span className="font-extrabold text-white">{winner.number}</span>
         </p>
         <p className="text-md mt-1">
-          👤 中奖者：
+          👤 winner：
           {winner.twitter ? (
             <a
               href={`https://x.com/${winner.twitter}`}
@@ -45,7 +45,7 @@ const LastWinner = () => {
               @{winner.twitter}
             </a>
           ) : (
-            <span className="text-gray-300">未绑定</span>
+            <span className="text-gray-300">Not bound</span>
           )}
         </p>
       </div>
