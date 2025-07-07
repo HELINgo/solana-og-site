@@ -5,7 +5,7 @@ import inject from '@rollup/plugin-inject';
 import rollupNodePolyfills from 'rollup-plugin-polyfill-node';
 
 export default defineConfig({
-  base: './',
+  base: '/'
   plugins: [react()],
   define: {
     'process.env': {}, // 防止环境变量报错
