@@ -163,8 +163,16 @@ const Lottery = () => {
     if (!x) return toast.error('请输入你的 X 用户名');
 
     const { error } = await supabase
-      .from('x_handles')
-      .upsert({ wallet: publicKey.toBase58(), x }, { onConflict: ['wallet'] });
+  .from('x_handles')
+  .upsert(
+    [{
+      wallet: publicKey.toBase58(),
+      x: x, // 显式指定字段
+    }],
+    {
+      onConflict: 'wallet', // ✅ 注意这里是字符串，而不是数组
+    }
+  );
 
     if (!error) {
       setSavedX(x);
