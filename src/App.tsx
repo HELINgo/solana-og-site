@@ -3,11 +3,11 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast'; // ✅ 全局 toast 组件
 
-import Home from './pages/Home';
-import MainApp from './pages/MainApp';
+import Home from './server/Home'; // ✅ 修改路径
+import MainApp from './server/MainApp'; // ✅ 修改路径
 import Leaderboard from './Leaderboard';
-import OGTools from './pages/GTools'; // ✅ 修复了文件名
-import Lottery from './pages/Lottery'; // ✅ 添加 Lottery 页面
+import OGTools from './server/GTools'; // ✅ 修改路径
+import Lottery from './server/Lottery'; // ✅ 修改路径
 
 function App() {
   const location = useLocation();
