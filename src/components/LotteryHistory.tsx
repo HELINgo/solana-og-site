@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
 import { supabase } from '../lib/supabase';
 
 interface HistoryItem {
@@ -55,65 +55,67 @@ const LotteryHistory = () => {
       {records.length === 0 ? (
         <p className="text-gray-400">No record yet</p>
       ) : (
-        <div className="space-y-3">
-          {records.map((item) => (
-            // ⭐︎ 手机端横向滚动，保持一行；桌面正常撑满
-            <div
-              key={item.id}
-              className="bg-black/30 px-4 py-3 rounded-lg shadow-md overflow-x-auto"
-            >
-              <div className="flex min-w-[700px] whitespace-nowrap items-center justify-between gap-4">
-                {/* 1 地址 */}
-                <div className="flex items-center gap-2">
-                  <span>📎</span>
-                  <span
-                    className="cursor-pointer text-purple-300 hover:underline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(item.wallet);
-                      alert('Address copied：' + item.wallet);
-                    }}
-                  >
-                    {item.wallet.slice(0, 4)}...{item.wallet.slice(-4)}
-                  </span>
-                </div>
-
-                {/* 2 twitter */}
-                <div className="flex items-center gap-2">
-                  <span>𝕏</span>
-                  {item.twitter ? (
-                    <a
-                      href={`https://x.com/${item.twitter}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:underline"
+        // ⭐ 所有横向滚动交给这一层
+        <div className="overflow-x-auto">
+          <div className="min-w-[750px] space-y-3">
+            {records.map((item) => (
+              <div
+                key={item.id}
+                className="bg-black/30 px-4 py-3 rounded-lg shadow-md"
+              >
+                <div className="flex min-w-[700px] whitespace-nowrap items-center justify-between gap-4">
+                  {/* 1 地址 */}
+                  <div className="flex items-center gap-2">
+                    <span>📎</span>
+                    <span
+                      className="cursor-pointer text-purple-300 hover:underline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(item.wallet);
+                        alert('Address copied：' + item.wallet);
+                      }}
                     >
-                      @{item.twitter}
-                    </a>
-                  ) : (
-                    <span className="text-gray-400">Not bound</span>
-                  )}
-                </div>
+                      {item.wallet.slice(0, 4)}...{item.wallet.slice(-4)}
+                    </span>
+                  </div>
 
-                {/* 3 中奖号码 */}
-                <div className="flex items-center gap-2">
-                  <span>🎫</span>
-                  <span>{item.number}</span>
-                </div>
+                  {/* 2 twitter */}
+                  <div className="flex items-center gap-2">
+                    <span>𝕏</span>
+                    {item.twitter ? (
+                      <a
+                        href={`https://x.com/${item.twitter}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:underline"
+                      >
+                        @{item.twitter}
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">Not bound</span>
+                    )}
+                  </div>
 
-                {/* 4 金额 */}
-                <div className="flex items-center gap-2">
-                  <span>🤑</span>
-                  <span className="text-yellow-300">{item.amount} SOL</span>
-                </div>
+                  {/* 3 中奖号码 */}
+                  <div className="flex items-center gap-2">
+                    <span>🎫</span>
+                    <span>{item.number}</span>
+                  </div>
 
-                {/* 5 时间 */}
-                <div className="flex items-center gap-2">
-                  <span>⏲️</span>
-                  <span>{new Date(item.round_time).toLocaleString('zh-CN')}</span>
+                  {/* 4 金额 */}
+                  <div className="flex items-center gap-2">
+                    <span>💰</span>
+                    <span className="text-yellow-300">{item.amount} SOL</span>
+                  </div>
+
+                  {/* 5 时间 */}
+                  <div className="flex items-center gap-2">
+                    <span>⏲️</span>
+                    <span>{new Date(item.round_time).toLocaleString('zh-CN')}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
@@ -168,6 +170,7 @@ const LotteryHistory = () => {
 };
 
 export default LotteryHistory;
+
 
 
 

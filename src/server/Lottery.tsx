@@ -44,7 +44,7 @@ const Lottery = () => {
       .maybeSingle();
 
     if (error || !data) {
-      console.error('轮次查询失败:', error);
+      console.error('Round query failed:', error);
       return null;
     }
 
@@ -62,7 +62,7 @@ const Lottery = () => {
         setPoolBalance(pool / LAMPORTS_PER_SOL);
         setWalletBalance(wallet / LAMPORTS_PER_SOL);
       } catch (e) {
-        console.error('余额读取失败：', e);
+        console.error('Balance reading failed：', e);
       }
     };
     fetchBalances();
@@ -82,7 +82,7 @@ const Lottery = () => {
         setSavedX(data.x);
         setXHandle(data.x);
       }
-      if (error) console.error('读取 x 失败:', error);
+      if (error) console.error('Failed to read x:', error);
     };
     fetchX();
   }, [publicKey]);
@@ -131,7 +131,7 @@ const Lottery = () => {
       .eq('round_id', roundId);
 
     if (error) {
-      console.error('读取已存在号码失败:', error);
+      console.error('Failed to read the existing number:', error);
       return [];
     }
 
@@ -158,9 +158,9 @@ const Lottery = () => {
   };
 
   const handleBindX = async () => {
-    if (!publicKey) return toast.error('请先连接钱包');
+    if (!publicKey) return toast.error('Please connect the wallet first');
     const x = xHandle.trim().replace(/^@/, '');
-    if (!x) return toast.error('请输入你的 X 用户名');
+    if (!x) return toast.error('Please enter your X username');
 
     const { error } = await supabase
   .from('x_handles')
@@ -176,17 +176,17 @@ const Lottery = () => {
 
     if (!error) {
       setSavedX(x);
-      toast.success('✅ 绑定成功');
+      toast.success('✅ Binding successful');
     } else {
-      console.error('绑定失败', error);
-      toast.error('❌ 绑定失败');
+      console.error('Binding failed', error);
+      toast.error('❌ Binding failed');
     }
   };
 
   const handleBuy = async () => {
-    if (!publicKey || !sendTransaction) return toast.error('请先连接钱包');
-    if (buyCount < 1 || buyCount > 10) return toast.error('购买数量需在 1~10 之间');
-    if (!savedX) return toast.error('请先绑定 X 账号');
+    if (!publicKey || !sendTransaction) return toast.error('Please connect the wallet first');
+    if (buyCount < 1 || buyCount > 10) return toast.error('Purchase quantity between 1 ~ 10');
+    if (!savedX) return toast.error('Please bind X account first');
 
     setLoading(true);
     try {
@@ -204,10 +204,10 @@ const Lottery = () => {
       );
       const sig = await sendTransaction(transaction, connection);
       await connection.confirmTransaction(sig, 'confirmed');
-      toast.success('✅ 购买成功');
+      toast.success('✅ Purchase successful');
 
       const roundId = await getCurrentRoundId();
-      if (!roundId) return toast.error('❌ 当前无有效轮次');
+      if (!roundId) return toast.error('❌ There is currently no valid round');
 
       const ticketNumbers = await generateUniqueTicketNumbers(roundId, buyCount);
       const insertData = ticketNumbers.map((num) => ({
@@ -222,22 +222,22 @@ const Lottery = () => {
             const { error } = await supabase.from('lottery_entries').insert(insertData);
       if (error) {
         console.error(error);
-        toast.error('❌ 分配失败');
+        toast.error('❌ Allocation failed');
       } else {
-        toast.success(`🎉 分配号码：${ticketNumbers.join(', ')}`);
+        toast.success(`🎉 Assign numbers：${ticketNumbers.join(', ')}`);
         
         // ✅ 积分更新调用
         try {
           const { updateScore } = await import('../utils/updateScore'); // 动态引入
           await updateScore(publicKey.toBase58(), buyCount);
         } catch (err) {
-          console.error('积分写入失败', err);
+          console.error('Points writing failed', err);
         }
       }
 
     } catch (err) {
-      console.error('转账失败', err);
-      toast.error('❌ 转账失败');
+      console.error('Transfer failed', err);
+      toast.error('❌ Transfer failed');
     }
     setLoading(false);
   };
@@ -274,7 +274,7 @@ return (
           onChange={(e) => i18n.changeLanguage(e.target.value)}
           className="bg-black/60 text-white border border-white/30 px-3 py-1 rounded-xl shadow text-sm"
         >
-          <option value="zh">中文</option>
+          <option value="zh">Chinese</option>
           <option value="en">English</option>
         </select>
       </div>

@@ -20,14 +20,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .limit(1); // ✅ 只查1条
 
     if (error) {
-      console.error('读取上一轮记录失败:', error);
-      return res.status(500).json({ success: false, message: '数据库查询失败', error });
+      console.error('Failed to read the last round of records:', error);
+      return res.status(500).json({ success: false, message: 'Database query failed', error });
     }
 
     res.status(200).json({ success: true, data });
   } catch (err) {
-    console.error('服务器内部错误:', err);
-    res.status(500).json({ success: false, message: '服务器错误', error: err });
+    console.error('Server internal error:', err);
+    res.status(500).json({ success: false, message: 'Server error', error: err });
   }
 }
 

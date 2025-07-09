@@ -14,7 +14,7 @@ const LastWinner = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('获取中奖者失败:', error);
+        console.error('Failed to obtain the winner:', error);
         return;
       }
 
@@ -31,7 +31,7 @@ const LastWinner = () => {
       <div className="bg-gradient-to-r from-yellow-600 via-pink-500 to-purple-600 text-white px-6 py-4 rounded-2xl shadow-xl text-center w-fit mr-4">
         <p className="text-xl font-bold mb-2">🎉 lastwinner</p>
         <p className="text-lg font-medium">
-          🎫 Scratch Card Lucky Number：<span className="font-extrabold text-white">{winner.number}</span>
+          🎫 winning number：<span className="font-extrabold text-white">{winner.number}</span>
         </p>
         <p className="text-md mt-1">
           👤  X：
