@@ -1,4 +1,3 @@
-// components/LastWinner.tsx
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -29,12 +28,13 @@ const LastWinner = () => {
 
   return (
     <div className="flex justify-center mt-6 mb-6">
-      <div className="bg-gradient-to-r from-yellow-600 via-pink-500 to-purple-600 text-white px-6 py-4 rounded-2xl shadow-xl text-center w-full max-w-3xl">
+      <div className="bg-gradient-to-r from-yellow-600 via-pink-500 to-purple-600 text-white px-6 py-4 rounded-2xl shadow-xl text-center w-fit mr-4">
+        <p className="text-xl font-bold mb-2">🎉 lastwinner</p>
         <p className="text-lg font-medium">
-          🎯 Scratch Card Lucky Number：<span className="font-extrabold text-white">{winner.number}</span>
+          🎫 Scratch Card Lucky Number：<span className="font-extrabold text-white">{winner.number}</span>
         </p>
         <p className="text-md mt-1">
-          👤 winner：
+          👤  X：
           {winner.twitter ? (
             <a
               href={`https://x.com/${winner.twitter}`}
@@ -54,6 +54,9 @@ const LastWinner = () => {
 };
 
 export default LastWinner;
+
+
+
 
 
 

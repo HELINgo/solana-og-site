@@ -242,126 +242,129 @@ const Lottery = () => {
     setLoading(false);
   };
 
-  return (
-    <div className="relative w-full min-h-screen text-white overflow-x-hidden"
+return (
+    <div
+      className="relative w-full min-h-screen text-white overflow-x-hidden"
       style={{
         backgroundImage: "url('/background.png')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}>
-      <div className="absolute inset-0 bg-black bg-opacity-60 z-0" />
-
-      <div className="fixed top-2 left-1/2 transform -translate-x-1/2 z-40 text-center">
-  <h2 className="text-2xl font-semibold text-yellow-300 mb-2">{t('🎉lastwinner')}</h2>
-  <LastWinner />
-</div>
-
-  <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
-  {/* 钱包连接按钮 */}
-  <WalletMultiButton />
-
-  {/* 返回主页按钮 */}
-  <a
-    href="/"
-    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-2 rounded-xl shadow hover:scale-105 transition-transform"
-  >
-    {t('back_home')}
-  </a>
-</div>
-
-
-
-{/* 顶部钱包按钮 + 返回主页 */}
-<div className="px-4 pt-4">
-  <div className="flex items-center gap-3">
-    <WalletMultiButton />
-    <a
-      href="/"
-      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-2 rounded-xl shadow hover:scale-105 transition-transform"
+        backgroundAttachment: 'fixed',
+      }}
     >
-      {t('back_home')}
-    </a>
-    <select
-  value={i18n.language} // ✅ 关键点在这里
-  onChange={(e) => i18n.changeLanguage(e.target.value)}
-  className="bg-black/60 text-white border border-white/30 px-3 py-1 rounded-xl shadow"
->
-  <option value="zh">Chinese</option>
-  <option value="en">English</option>
-</select>
+      {/* 黑色遮罩 */}
+      <div className="absolute inset-0 bg-black/60 z-0" />
 
+      {/* ▶① 钱包按钮 – 右上角固定 */}
+      <div className="fixed top-4 right-4 z-50">
+        <WalletMultiButton className="!bg-purple-600 !text-white !rounded-xl !px-4 !py-2 text-sm !shadow-md hover:scale-105 transition-transform" />
+      </div>
 
-  </div>
+      {/* ▶② 返回主页 + 语言切换 – 左上角固定 */}
+      <div className="fixed top-[4.5rem] left-4 z-50 flex gap-3 items-center">
+        <a
+          href="/"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-4 py-2 rounded-xl shadow hover:scale-105 transition-transform"
+        >
+          {t('back_home')}
+        </a>
+        <select
+          value={i18n.language}
+          onChange={(e) => i18n.changeLanguage(e.target.value)}
+          className="bg-black/60 text-white border border-white/30 px-3 py-1 rounded-xl shadow text-sm"
+        >
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </div>
 
-  {/* 👇 移到下方靠左显示 */}
-  <div className="mt-3 bg-white/10 text-white px-4 py-3 rounded-xl shadow text-sm space-y-1 w-fit">
-    <p>{t('pool')}<span className="text-yellow-300 font-semibold">{poolBalance.toFixed(2)} SOL</span></p>
-    <p>🪙 {t('walletbalance')}：<span className="text-green-300">{walletBalance.toFixed(3)} SOL</span></p>
-    <p> {t('countdown')}<span className="text-blue-300">{formatTime(timeLeft)}</span></p>
-  </div>
-</div>
+      {/* ▶③ 上一轮中奖信息（靠右显示） */}
+      <div className="px-4 mt-6 max-w-screen-md mx-auto flex justify-end">
+        <LastWinner />
+      </div>
 
+      {/* ▶④ 钱包余额与奖池状态展示 */}
+      <div className="px-4">
+        <div className="mt-3 bg-white/10 text-white px-4 py-3 rounded-xl shadow text-sm space-y-1 w-fit">
+          <p>
+            {t('pool')}
+            <span className="text-yellow-300 font-semibold">{poolBalance.toFixed(2)} SOL</span>
+          </p>
+          <p>
+            🪙 {t('walletbalance')}：
+            <span className="text-green-300">{walletBalance.toFixed(3)} SOL</span>
+          </p>
+          <p>
+            {t('countdown')}
+            <span className="text-blue-300">{formatTime(timeLeft)}</span>
+          </p>
+        </div>
+      </div>
 
+      {/* ▶⑤ 购票卡片 —— 不论连没连都渲染 */}
+      <div className="flex justify-center mt-[30px] mb-[20px]">
+        <div className="bg-white/10 p-6 rounded-2xl shadow-xl max-w-xl w-full">
+          <label className="block mb-3 text-white font-medium text-sm">
+            {t('buy_quantity')}
+          </label>
+          <div className="flex items-center gap-4">
+            <input
+              type="number"
+              min={1}
+              max={10}
+              value={buyCount}
+              onChange={(e) => setBuyCount(parseInt(e.target.value))}
+              className="bg-black/40 text-white px-4 py-2 rounded-xl border border-white/20 w-28 text-center"
+            />
+            <button
+              onClick={handleBuy}
+              disabled={!connected || loading}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl shadow-md hover:scale-105 transition-transform disabled:opacity-50"
+            >
+              {!connected
+                ? t('connect_wallet_first')
+                : loading
+                ? t('buying')
+                : t('buy_now')}
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {/* ▶⑥ 绑定 X 账号区域 */}
       {connected && (
-        <>
-          {/* 购票卡片 */}
-          <div className="flex justify-center mt-[30px] mb-[20px]">
-            <div className="bg-white/10 p-6 rounded-2xl shadow-xl max-w-xl w-full">
-              <label className="block mb-3 text-white font-medium text-sm"> {t('buy_quantity')}</label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={buyCount}
-                  onChange={(e) => setBuyCount(parseInt(e.target.value))}
-                  className="bg-black/40 text-white px-4 py-2 rounded-xl border border-white/20 w-28 text-center"
-                />
-                <button
-                  onClick={handleBuy}
-                  disabled={loading}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-xl shadow-md hover:scale-105 transition-transform"
-                >
-                  {loading ? t('buying') : ` ${t('buy_now')}`}
-                </button>
-              </div>
-            </div>
+        <div className="flex justify-center">
+          <div className="bg-white/10 p-6 rounded-2xl mb-12 max-w-2xl w-full shadow-xl">
+            {savedX ? (
+              <p className="text-green-400 font-medium">
+                {t('bind_success')}@{savedX}
+              </p>
+            ) : (
+              <>
+                <label className="block mb-2 text-white font-semibold">{t('bind_x')}</label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={xHandle}
+                    onChange={(e) => setXHandle(e.target.value)}
+                    placeholder="@yourhandle"
+                    className="bg-white/20 border text-white px-4 py-2 rounded-xl w-full"
+                  />
+                  <button
+                    onClick={handleBindX}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold"
+                  >
+                    {t('bind_btn')}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-
-          {/* 绑定 X 账号区域 */}
-          <div className="flex justify-center">
-            <div className="bg-white/10 p-6 rounded-2xl mb-12 max-w-2xl w-full shadow-xl">
-              {savedX ? (
-                <p className="text-green-400 font-medium"> {t('bind_success')}@{savedX}</p>
-              ) : (
-                <>
-                  <label className="block mb-2 text-white font-semibold">{t('bind_x')}</label>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="text"
-                      value={xHandle}
-                      onChange={(e) => setXHandle(e.target.value)}
-                      placeholder="@yourhandle"
-                      className="bg-white/20 border text-white px-4 py-2 rounded-xl w-full"
-                    />
-                    <button
-                      onClick={handleBindX}
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold"
-                    >
-                      {t('bind_btn')}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </>
+        </div>
       )}
 
-      {/* 展示记录组件 */}
+      {/* ▶⑦ 展示记录组件 */}
       <div className="max-w-5xl mx-auto w-full space-y-10 px-4">
         <LotteryRecords />
         <LotteryHistory />

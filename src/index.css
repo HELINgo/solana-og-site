@@ -88,13 +88,5 @@ button {
     transform: translateY(0);
   }
 }
-/* -------- 专用于 Lottery 页面布局撑满并居中 -------- */
-.lottery-wrapper {
-  width: 100%;
-  max-width: 1200px;           /* ✅ 宽度上限，内容居中更优雅 */
-  margin: 0 auto;              /* ✅ 水平居中 */
-  padding: 0 1rem;             /* ✅ 左右间距 */
-  box-sizing: border-box;
-}
 
 

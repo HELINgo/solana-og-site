@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { fetchCurrentRoundId } from '../utils/fetchCurrentRoundId';
-import toast from 'react-hot-toast'; // ✅ 添加 toast 提示
+import toast from 'react-hot-toast';
 
 interface RecordEntry {
   wallet: string;
@@ -56,50 +56,59 @@ const LotteryRecords = () => {
         <p className="text-gray-400">No record yet</p>
       ) : (
         <>
-          <table className="w-full text-sm mb-4">
-            <thead>
-              <tr className="text-white border-b border-white/20">
-                <th className="py-2 text-left">address</th>
-                <th className="py-2 text-left">X Account</th>
-                <th className="py-2 text-left">Scratch Card Number</th>
-                <th className="py-2 text-left">time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((entry, i) => (
-                <tr key={i} className="border-b border-white/10">
-                  <td
-                    className="py-2 text-purple-300 cursor-pointer"
-                    title={entry.wallet}
-                    onClick={() => {
-                      navigator.clipboard.writeText(entry.wallet);
-                      toast.success('Purchase address copied');
-                    }}
-                  >
-                    {entry.wallet.slice(0, 4)}..{entry.wallet.slice(-4)}
-                  </td>
-                  <td className="py-2 text-indigo-300">
-                    {entry.x ? (
-                      <a href={`https://x.com/${entry.x}`} target="_blank" rel="noopener noreferrer">@{entry.x}</a>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                  <td className="py-2 text-yellow-300">{entry.ticket_number}</td>
-                  <td className="py-2 text-gray-400">
-                    {new Date(entry.created_at).toLocaleString('zh-CN', {
-                      year: 'numeric',
-                      month: 'numeric',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                    })}
-                  </td>
+          {/* ⭐︎ 手机端出现横向滚动条，整行保持一条 */}
+          <div className="overflow-x-auto">
+            <table className="min-w-[750px] text-sm mb-4 whitespace-nowrap">
+              <thead>
+                <tr className="text-white border-b border-white/20">
+                  <th className="py-2 text-left">address</th>
+                  <th className="py-2 text-left">X Account</th>
+                  <th className="py-2 text-left">Scratch Card Number</th>
+                  <th className="py-2 text-left">time</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {records.map((entry, i) => (
+                  <tr key={i} className="border-b border-white/10">
+                    <td
+                      className="py-2 text-purple-300 cursor-pointer"
+                      title={entry.wallet}
+                      onClick={() => {
+                        navigator.clipboard.writeText(entry.wallet);
+                        toast.success('Purchase address copied');
+                      }}
+                    >
+                      {entry.wallet.slice(0, 4)}..{entry.wallet.slice(-4)}
+                    </td>
+                    <td className="py-2 text-indigo-300">
+                      {entry.x ? (
+                        <a
+                          href={`https://x.com/${entry.x}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          @{entry.x}
+                        </a>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                    <td className="py-2 text-yellow-300">{entry.ticket_number}</td>
+                    <td className="py-2 text-gray-400">
+                      {new Date(entry.created_at).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* 分页按钮 */}
           <div className="flex justify-center gap-4">
@@ -126,6 +135,8 @@ const LotteryRecords = () => {
 };
 
 export default LotteryRecords;
+
+
 
 
 
